@@ -8,6 +8,7 @@ flavour="$2"
 shift 2
 
 if [[ "${host}" == macosx-universal-clang ]]; then
+	brew install p7zip
 	cd ~
 	curl -O https://www.libsdl.org/release/SDL2-2.0.7.tar.gz
 	tar xzf SDL2-2.0.7.tar.gz
@@ -31,7 +32,7 @@ case "${host}" in
 esac
 
 sudo apt-get update -qq
-sudo apt-get -q -y install cmake dpkg
+sudo apt-get -q -y install cmake dpkg p7zip-full
 
 case "${host}" in
 	(native)
