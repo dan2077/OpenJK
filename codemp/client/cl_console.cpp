@@ -912,10 +912,6 @@ void Con_DrawSolidConsole( float frac ) {
 	int				lines;
 //	qhandle_t		conShader;
 	int				currentColor;
-	struct tm		*newtime;
-	char			am_pm[] = "AM";
-	time_t			rawtime;
-	char			ts[24];
 
 	lines = (int) (cls.glconfig.vidHeight * frac);
 	if (lines <= 0)
@@ -955,15 +951,6 @@ void Con_DrawSolidConsole( float frac ) {
 		SCR_DrawSmallChar( cls.glconfig.vidWidth - ( i - x + 1 ) * con.charWidth,
 			(lines-(con.charHeight*2+con.charHeight/2)), JK_VERSION[x] );
 	}
-
-	// Draw time and date
-	time(&rawtime);
-	newtime = localtime(&rawtime);
-	if (newtime->tm_hour > 12) strcpy(am_pm, "PM");
-	if (newtime->tm_hour > 12) newtime->tm_hour -= 12;
-	if (newtime->tm_hour == 0) newtime->tm_hour = 12;
-	Com_sprintf(ts, sizeof(ts), "%.19s %s ", asctime(newtime), am_pm);
-	i = strlen(ts);
 
 	for (x = 0; x<i; x++) {
 		SCR_DrawSmallChar(cls.glconfig.vidWidth - (i - x) * con.charWidth, lines - (con.charHeight + con.charHeight / 2), ts[x]);
