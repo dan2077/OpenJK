@@ -26,6 +26,15 @@ case "${host}" in
 		;;
 	(macosx-universal-clang)
 		set -- \
+			-D UseInternalJPEG=ON \
+			-D UseInternalPNG=ON \
+			-D UseInternalOpenAL=ON \
+			-D UseInternalSDL2=OFF \
+			-D UseInternalZlib=OFF \
+			-D CMAKE_OSX_SYSROOT="" \
+			-D OPENGL_INCLUDE_DIRH=/System/Library/Frameworks/OpenGL.framework \
+			-D OPENGL_gl_LIBRARY=/System/Library/Frameworks/OpenGL.framework \
+			-D OPENGL_glu_LIBRARY=/System/Library/Frameworks/OpenGL.framework \
 			"$@"
 		;;
 	(native)
