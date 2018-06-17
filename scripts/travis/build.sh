@@ -72,7 +72,6 @@ case "${host}" in
 			mv eternaljk-macos-"${arch}".tar.gz /Users/travis/build/eternalcodes/EternalJK/ && \
 			cd ../../ && \
 			find . -ls )
-		fi
 		;;
 	(i?86-linux-gnu|native)
 		if [ -n "${deploy}" ]; then
@@ -82,6 +81,8 @@ case "${host}" in
 				mv eternaljk-linux-"${arch}".tar.gz /home/travis/build/eternalcodes/EternalJK/ && \
 				cd ../../ && \
 				find . -ls )
+		else
+		( cd $(pwd)/build/DESTDIR && find . -ls )
 		fi
 		;;
 	(i686-w64-mingw32)
@@ -94,6 +95,8 @@ case "${host}" in
 				mv ejk-japro-pk3only.zip /home/travis/build/eternalcodes/EternalJK/ && \
 				cd ../../../ && \
 				find . -ls )
+		else
+		( cd $(pwd)/build/DESTDIR && find . -ls )
 		fi
 		;;
 	(*)
