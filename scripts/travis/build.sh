@@ -58,11 +58,14 @@ fi
 
 case "${host}" in
 	(macosx-universal-clang)
-		( cd $(pwd)/build/DESTDIR/prefix/JediAcademy/eternaljk.x86_64.app/ && \
+		( cd $(pwd)/build/DESTDIR/prefix/JediAcademy/ && \
 			tar czvf eternaljk-macos-"${arch}".tar.gz * && \
 			mv eternaljk-macos-"${arch}".tar.gz /Users/travis/build/eternalcodes/EternalJK/ && \
-			cd ../../../ && \
+			cd ../../ && \
 			find . -ls )
+		else
+			( cd $(pwd)/build/DESTDIR && find . -ls )
+		fi
 		;;
 	(i?86-linux-gnu|native)
 		if [ -n "${deploy}" ]; then
