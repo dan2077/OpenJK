@@ -15,7 +15,6 @@ case "${host}" in
 		export CXX=${host}-g++
 		set -- \
 			-D CMAKE_TOOLCHAIN_FILE=$(pwd)/CMakeModules/Toolchains/${host}.cmake \
-			-D BuildMPCGame=OFF \
 			"$@"
 		;;
 
@@ -40,7 +39,6 @@ case "${host}" in
 	(native)
 		if [ -n "${deploy}" ]; then
 			set -- \
-			-D BuildMPCGame=OFF \
 				"$@"
 		fi
 		;;
@@ -75,7 +73,6 @@ case "${host}" in
 		;;
 	(i?86-linux-gnu|native)
 		if [ -n "${deploy}" ]; then
-			( cp /home/travis/build/eternalcodes/EternalJK/assets/bins-linux/cgamex86_64.so $(pwd)/build/DESTDIR/prefix/JediAcademy/eternaljk/ && \
 				cd $(pwd)/build/DESTDIR/prefix/JediAcademy/ && \
 				tar czvf eternaljk-linux-"${arch}".tar.gz * && \
 				mv eternaljk-linux-"${arch}".tar.gz /home/travis/build/eternalcodes/EternalJK/ && \
