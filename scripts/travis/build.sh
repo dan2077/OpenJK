@@ -32,7 +32,7 @@ case "${host}" in
 			-D UseInternalSDL2=OFF \
 			-D UseInternalZlib=OFF \
 			-D CMAKE_OSX_SYSROOT="" \
-			-D OPENGL_INCLUDE_DIRH=/System/Library/Frameworks/OpenGL.framework \
+			-D OPENGL_INCLUDE_DIR=/System/Library/Frameworks/OpenGL.framework \
 			-D OPENGL_gl_LIBRARY=/System/Library/Frameworks/OpenGL.framework \
 			-D OPENGL_glu_LIBRARY=/System/Library/Frameworks/OpenGL.framework \
 			"$@"
