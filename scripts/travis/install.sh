@@ -11,7 +11,7 @@ if [[ "${host}" == macosx-universal-clang ]]; then
 	curl -O https://www.libsdl.org/release/SDL2-2.0.8.dmg
 	sudo hdiutil attach SDL2-2.0.8.dmg
 	sudo cp -a /Volumes/SDL2/SDL2.framework /Library/Frameworks/
-	sudo hdiutil deatch /Volumes/SDL2
+	sudo hdiutil detach /Volumes/SDL2
 	rm -f SDL2-2.0.8.dmg
 	brew install p7zip
 else
