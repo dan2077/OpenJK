@@ -26,7 +26,7 @@ Installing and running EternalJK:
 ### Contributing to EternalJK
 * [Fork](https://github.com/eternalcodes/EternalJK/fork) the EternalJK project on GitHub
 * Create a new branch on your fork and make your changes
-* Send a [pull request](https://help.github.com/articles/creating-a-pull-request) to upstream (eternalcodes/master)
+* Send a [pull request](https://help.github.com/articles/creating-a-pull-request) to upstream (eternaljk/master)
 
 ## Maintainers
 
