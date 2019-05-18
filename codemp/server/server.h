@@ -297,6 +297,9 @@ extern	cvar_t	*sv_autoDemoBots;
 extern	cvar_t	*sv_autoDemoMaxMaps;
 extern	cvar_t	*sv_legacyFixes;
 extern	cvar_t	*sv_banFile;
+extern	cvar_t	*sv_maxOOBRate;
+extern	cvar_t	*sv_maxOOBRateIP;
+extern	cvar_t	*sv_autoWhitelist;
 
 extern	cvar_t	*sv_snapShotDuelCull;
 
@@ -332,24 +335,16 @@ extern	int serverBansCount;
 //
 typedef struct leakyBucket_s leakyBucket_t;
 struct leakyBucket_s {
-	netadrtype_t	type;
-
-	union {
-		byte	_4[4];
-	} ipv;
-
 	int					lastTime;
-	signed char			burst;
-
-	long				hash;
-
-	leakyBucket_t *prev, *next;
+	unsigned short		burst;
 };
 
 extern leakyBucket_t outboundLeakyBucket;
 
-qboolean SVC_RateLimit( leakyBucket_t *bucket, int burst, int period );
-qboolean SVC_RateLimitAddress( netadr_t from, int burst, int period );
+qboolean SVC_RateLimit( leakyBucket_t *bucket, int burst, int period, int now );
+qboolean SVC_RateLimitAddress( netadr_t from, int burst, int period, int now );
+void SVC_LoadWhitelist( void );
+void SVC_WhitelistAdr( netadr_t adr );
 void SV_FinalMessage (char *message);
 void QDECL SV_SendServerCommand( client_t *cl, const char *fmt, ...);
 
