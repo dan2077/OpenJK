@@ -1486,6 +1486,8 @@ void CG_SpeedometerSettings_f(void)
 	}
 }
 
+CosmeticUnlocks_t cosmeticUnlocks[MAX_COSMETIC_UNLOCKS];
+
 static bitInfo_T cosmetics[] = {
 	{ "Santa hat" },
 	{ "Jack-o'-lantern" },
