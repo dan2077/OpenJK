@@ -664,7 +664,7 @@ static rserr_t GLimp_SetMode(glconfig_t *glConfig, const windowDesc_t *windowDes
 
 	SDL_FreeSurface( icon );
 
-	if (!GLimp_DetectAvailableModes())
+	if (fullscreen && !GLimp_DetectAvailableModes())
 	{
 		return RSERR_UNKNOWN;
 	}
