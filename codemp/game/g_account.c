@@ -1667,6 +1667,8 @@ void G_UpdateUnlocks(char *username, char *coursename, int style, int duration_m
 	}
 }
 
+CosmeticUnlocks_t cosmeticUnlocks[MAX_COSMETIC_UNLOCKS];
+
 void G_SpawnCosmeticUnlocks(void) {
 	fileHandle_t f;
 	int		fLen = 0, MAX_FILESIZE = 4096, args = 1, row = 0;  //use max num warps idk
@@ -6924,6 +6926,8 @@ void InitGameAccountStuff( void ) { //Called every mapload , move the create tab
 
 	//DebugWriteToDB("InitGameAccountStuff");
 }
+
+Warp_t warpList[64];
 
 void G_SpawnWarpLocationsFromCfg(void) //loda fixme
 {

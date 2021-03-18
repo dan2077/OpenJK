@@ -955,7 +955,7 @@ typedef struct loadableEmoji_s
 	qhandle_t	emoji;
 } loadableEmoji_t;
 
-loadableEmoji_t emojis[MAX_LOADABLE_EMOJIS];
+extern loadableEmoji_t emojis[MAX_LOADABLE_EMOJIS];
 
 typedef struct chatBoxEmoji_s
 {
@@ -2404,7 +2404,7 @@ typedef struct CosmeticUnlocks_s {
 	unsigned int	duration;
 	qboolean		active;
 } CosmeticUnlocks_t;
-CosmeticUnlocks_t cosmeticUnlocks[MAX_COSMETIC_UNLOCKS];
+extern CosmeticUnlocks_t cosmeticUnlocks[MAX_COSMETIC_UNLOCKS];
 //japro
 
 //
