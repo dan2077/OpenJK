@@ -11646,6 +11646,15 @@ static void CG_Draw2D( void ) {
 
 	if (cg_drawPlayerNames.integer)//JAPRO
 		CG_PlayerLabels();
+
+	if (cg.mouseMode && (trap->Key_GetCatcher() & KEYCATCH_CGAME))
+	{
+		CG_DrawPic(cgs.cursorX * cgs.widthRatioCoef, cgs.cursorY, 36, 36, trap->R_RegisterShaderNoMip("cursor"));
+	}
+	else
+	{
+		cg.mouseMode = 0;
+	}
 }
 
 qboolean CG_CullPointAndRadius( const vec3_t pt, float radius);

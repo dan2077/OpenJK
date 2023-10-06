@@ -746,6 +746,13 @@ void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y
 #endif
 }
 
+void CG_HUD_MouseMovement(int x, int y)
+{
+	cgs.cursorX = Com_Clampi(0, cgs.glconfig.vidWidth * cgs.widthRatioCoef, cgs.cursorX + x);
+	cgs.cursorY = Com_Clampi(0, SCREEN_HEIGHT, cgs.cursorY + y);
+	return;
+}
+
 void CG_MouseEvent(int x, int y) {
 	int n;
 
@@ -755,6 +762,12 @@ void CG_MouseEvent(int x, int y) {
 		return;
 	}
 	*/
+
+	if (cg.mouseMode)
+	{
+		CG_HUD_MouseMovement(x, y);
+		return;
+	}
 
 	cgs.cursorX+= x;
 	if (cgs.cursorX < 0)

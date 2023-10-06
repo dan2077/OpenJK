@@ -2358,6 +2358,32 @@ void CG_Say_f( void ) {
 	}
 }
 
+static void CG_editMode_f(void)
+{
+	if (cg.showScores)
+	{
+		if (cg.mouseMode)
+		{ 
+			cg.mouseMode = qtrue;
+			trap->Key_SetCatcher(0);
+		}
+
+		return;
+	}
+
+	if (!cg.mouseMode)
+	{
+		cg.mouseMode = qtrue;
+		trap->Key_SetCatcher(KEYCATCH_CGAME);
+	}
+	else
+	{
+		cg.mouseMode = qfalse;
+		trap->Key_SetCatcher(0);
+	}
+	return;
+}
+
 typedef struct consoleCommand_s {
 	const char	*cmd;
 	void		(*func)(void);
@@ -2454,6 +2480,7 @@ static consoleCommand_t	commands[] = {
 	{ "loadTrail",					CG_SpawnStrafeTrailFromCFG_f },
 	{ "weaplast",					CG_LastWeapon_f },
 	{ "do",							CG_Do_f },
+	{ "editMode",					CG_editMode_f },
 };
 
 static const size_t numCommands = ARRAY_LEN( commands );
