@@ -746,11 +746,219 @@ void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y
 #endif
 }
 
+qboolean CG_CoordsInRect(int x, int y, int width, int height)
+{
+	int left = (width < 0) ? (x + width) : x;
+	int right = (width < 0) ? x : (x + width);
+
+	return (qboolean)(cgs.cursorX >= left && cgs.cursorX <= right && cgs.cursorY >= y && cgs.cursorY <= (y + height));
+}
+
+hudElement_t *CG_HUD_CreateElement(const char *elementName, float *x, float *y, float *width, float *height, qboolean applyRatio)
+{
+	hudElement_t *element = malloc(sizeof(*element));
+	if (!element) trap->Error(ERR_DROP, S_COLOR_RED"Failed to allocate memory for new hud element.");
+
+	element->name = elementName;
+	element->x = x;
+	element->y = y;
+	element->width = width;
+	element->height = height;
+	element->defaultSettings = qfalse;
+	element->applyRatio = applyRatio;
+
+	element->next = NULL;
+	element->child = NULL;
+
+	CG_HUD_InsertElement(element);
+	
+	return element;
+}
+
+static hudElement_t *rootElement;
+
+void CG_HUD_InsertElement(hudElement_t *element)
+{
+	if (!rootElement)
+	{
+		rootElement = element;
+	}
+	else 
+	{
+		hudElement_t *current = rootElement;
+
+		while (current->next != NULL) 
+		{
+			current = current->next;
+		}
+
+		current->next = element;
+	}
+}
+
+void CG_HUD_FreeElements(void)
+{
+	hudElement_t *current = rootElement;
+	hudElement_t *next;
+
+	while (current)
+	{
+		hudElement_t *child = current->child;
+		hudElement_t *nextChild;
+
+		while (child)
+		{
+			nextChild = child->next;
+			free(child);
+			child = nextChild;
+		}
+
+		next = current->next;
+		free(current);
+		current = next;
+	}
+
+	rootElement = NULL;
+}
+
+hudElement_t *CG_HUD_CreateChildElement(hudElement_t *parent, const char *elementName, float *x, float *y, float *width, float *height, qboolean applyRatio)
+{
+    hudElement_t *child = malloc(sizeof(*child));
+    if (!child) trap->Error(ERR_DROP, S_COLOR_RED"Failed to allocate memory for new hud element.");
+
+    child->name = elementName;
+    child->x = x;
+    child->y = y;
+    child->width = width;
+    child->height = height;
+    child->defaultSettings = qfalse;
+	child->applyRatio = applyRatio;
+
+    child->next = NULL;
+
+    CG_HUD_AddChildElement(parent, child); // Add the new element as a child of the parent
+
+    return child;
+}
+
+void CG_HUD_AddChildElement(hudElement_t *parent, hudElement_t *child)
+{
+	if (!parent->child)
+	{
+		parent->child = child; // If the parent has no children, add the new element as the first child
+	}
+	else
+	{
+		hudElement_t *current = parent->child;
+
+		while (current->next != NULL)
+		{
+			current = current->next; // Go to the last child
+		}
+
+		current->next = child; // Add the new element as the next sibling of the last child
+	}
+}
+
+void CG_HUD_HandleElements(void)
+{
+	int prevX, prevY, prevWidth, prevHeight;
+	int diffX, diffY;
+	int currentX, currentY;
+	static int oldX = -1, oldY = -1;
+	hudElement_t *current = rootElement;
+	hudElement_t *child;
+
+	while (current)
+	{
+		currentX = cgs.cursorX;
+		currentY = cgs.cursorY;
+
+		prevX = *current->x;
+		prevY = *current->y;
+		prevWidth = *current->width;
+		prevHeight = *current->height;
+
+		CG_DrawRect(prevX, prevY, prevWidth * cgs.widthRatioCoef, prevHeight, 3, colorRed);
+
+		if (CG_CoordsInRect(prevX, prevY, prevWidth * cgs.widthRatioCoef, prevHeight))
+		{
+			CG_DrawRect(prevX, prevY, prevWidth * cgs.widthRatioCoef, prevHeight, 3, colorGreen);
+
+			if (cg.mouseClicks == 1)
+			{
+				if (oldX == -1 && oldY == -1) // Mouse button just pressed
+				{
+					oldX = currentX; // Start tracking
+					oldY = currentY;
+				}
+				else // Mouse button is being held down
+				{
+					diffX = currentX - oldX;
+					diffY = currentY - oldY;
+
+					*current->x += diffX * (current->applyRatio ? cgs.widthRatioCoef : 1); // Update position
+					*current->y += diffY;
+
+					child = current->child;
+
+					while (child) // Update the children
+					{
+						*child->x += diffX * (child->applyRatio ? cgs.widthRatioCoef : 1);
+						*child->y += diffY;
+
+						child = child->next;
+					}
+
+					oldX = currentX; // Update tracking
+					oldY = currentY;
+				}
+			}
+			else if (cg.mouseClicks == 0 && oldX != -1 && oldY != -1)
+			{
+				oldX = -1; // Stop tracking
+				oldY = -1;
+			}
+		}
+
+		current = current->next;
+	}
+
+	if (cg.mouseClicks == 0) // Reset tracking when mouse is released
+	{
+		oldX = -1;
+		oldY = -1;
+	}
+
+	trap->R_SetColor(NULL);
+}
+
 void CG_HUD_MouseMovement(int x, int y)
 {
-	cgs.cursorX = Com_Clampi(0, cgs.glconfig.vidWidth * cgs.widthRatioCoef, cgs.cursorX + x);
+	cgs.cursorX = Com_Clampi(0, SCREEN_WIDTH, cgs.cursorX + x);
 	cgs.cursorY = Com_Clampi(0, SCREEN_HEIGHT, cgs.cursorY + y);
 	return;
+}
+
+void CG_HUD_Keys(int key, qboolean down)
+{
+	if (key == A_MOUSE1)
+	{
+		if (down)
+		{
+			cg.mouseClicks = 1;
+		}
+		else
+		{
+			cg.mouseClicks = 0;
+		}
+	}
+	else if (down)
+	{
+		cg.mouseClicks = 0;
+		cg.mouseMode = qfalse;
+		trap->Key_SetCatcher(0);
+	}
 }
 
 void CG_MouseEvent(int x, int y) {
@@ -844,6 +1052,12 @@ void CG_EventHandling(int type) {
 
 
 void CG_KeyEvent(int key, qboolean down) {
+
+	if (cg.mouseMode)
+	{
+		CG_HUD_Keys(key, down);
+		return;
+	}
 
 	if (!down) {
 		return;

@@ -1096,6 +1096,33 @@ struct dynTable_s
 	dynColumnInfo_t *columnInfo;
 };
 
+typedef struct hudElement_s hudElement_t;
+
+hudElement_t *root;
+
+struct hudElement_s
+{
+	hudElement_t *next;
+	hudElement_t *child;
+	char		*name;
+
+	float		*x;
+	float		*y;
+	float		*width;
+	float		*height;
+
+	qboolean	applyRatio;
+
+	qboolean	defaultSettings;
+	
+	float		defaultX;
+	float		defaultY;
+	float		defaultWidth;
+	float		Height;
+
+	qboolean	enabled;
+};
+
 typedef struct cg_s {
 	int			clientFrame;		// incremented each frame
 
@@ -1330,6 +1357,7 @@ typedef struct cg_s {
 	vec3_t			lastFPFlashPoint;
 
 	qboolean		mouseMode;
+	int				mouseClicks;
 
 /*
 Ghoul2 Insert Start
@@ -2435,6 +2463,13 @@ qboolean CG_YourTeamHasFlag(void);
 qboolean CG_OtherTeamHasFlag(void);
 qhandle_t CG_StatusHandle(int task);
 
+//Dynamic hud
+hudElement_t *CG_HUD_CreateElement(const char *elementName, float *x, float *y, float *width, float *height, qboolean applyRatio);
+void CG_HUD_InsertElement(hudElement_t *element);
+hudElement_t *CG_HUD_CreateChildElement(hudElement_t *parent, const char *elementName, float *x, float *y, float *width, float *height, qboolean applyRatio);
+void CG_HUD_AddChildElement(hudElement_t *parent, hudElement_t *child);
+void CG_HUD_HandleElements(void);
+void CG_HUD_FreeElements(void);
 
 
 //
