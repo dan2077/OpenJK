@@ -497,7 +497,8 @@ typedef struct displayContextDef_s {
 	qhandle_t		gradientImage;
 	qhandle_t		cursor;
 	float			FPS;
-	float			widthRatioCoef;
+	float			screenWidth;
+    float           screenHeight;
 	int				screenshotFormat;
 
 	struct {
@@ -563,8 +564,7 @@ void Menu_SetItemBackground(const menuDef_t *menu,const char *itemName, const ch
 void *UI_Alloc( int size );
 void UI_InitMemory( void );
 qboolean UI_OutOfMemory();
-
-void UI_Set2DRatio(void);
+void UI_UpdateWidescreen(void);
 
 void Controls_GetConfig( void );
 void Controls_SetConfig( void );

@@ -398,11 +398,11 @@ qboolean CG_DrawOldScoreboard( void ) {
 	{
 		s = va("%s^7 %s", cgs.clientinfo[cgs.duelWinner].name, CG_GetStringEdString("MP_INGAME", "DUEL_WINS") );
 		/*w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-		x = ( SCREEN_WIDTH - w ) / 2;
+		x = ( cgs.screenWidth - w ) / 2;
 		y = 40;
 		CG_DrawBigString( x, y, s, fade );
 		*/
-		x = ( SCREEN_WIDTH ) / 2;
+		x = cgs.screenWidth / 2;
 		y = 40;
 		CG_Text_Paint ( x - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, y, 1.0f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM );
 	}
@@ -418,22 +418,22 @@ qboolean CG_DrawOldScoreboard( void ) {
 			s = va("%s^7 %s %s", cgs.clientinfo[cgs.duelist1].name, CG_GetStringEdString("MP_INGAME", "SPECHUD_VERSUS"), cgs.clientinfo[cgs.duelist2].name );
 		}
 		/*w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-		x = ( SCREEN_WIDTH - w ) / 2;
+		x = ( cgs.screenWidth - w ) / 2;
 		y = 40;
 		CG_DrawBigString( x, y, s, fade );
 		*/
-		x = ( SCREEN_WIDTH ) / 2;
+		x = ( cgs.screenWidth ) / 2;
 		y = 40;
 		CG_Text_Paint ( x - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, y, 1.0f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM );
 	}
 	else if ( cg.killerName[0] ) {
 		s = va("%s %s", CG_GetStringEdString("MP_INGAME", "KILLEDBY"), cg.killerName );
 		/*w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-		x = ( SCREEN_WIDTH - w ) / 2;
+		x = ( cgs.screenWidth - w ) / 2;
 		y = 40;
 		CG_DrawBigString( x, y, s, fade );
 		*/
-		x = ( SCREEN_WIDTH ) / 2;
+		x = ( cgs.screenWidth ) / 2;
 		y = 40;
 		CG_Text_Paint ( x - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, y, 1.0f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM );
 	}
@@ -461,7 +461,7 @@ qboolean CG_DrawOldScoreboard( void ) {
 				sWith,
 				cg.snap->ps.persistant[PERS_SCORE] );
 		//	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-			x = ( SCREEN_WIDTH ) / 2;
+			x = ( cgs.screenWidth ) / 2;
 			y = 60;
 			//CG_DrawBigString( x, y, s, fade );
 			CG_DrawProportionalString(x, y, s, UI_CENTER|UI_DROPSHADOW, colorTable[CT_WHITE]);
@@ -477,7 +477,7 @@ qboolean CG_DrawOldScoreboard( void ) {
 			s = va("%s, %i / %i", CG_GetStringEdString("MP_INGAME", "BLUE_LEADS"), cg.teamScores[1], cg.teamScores[0] );
 		}
 
-		x = ( SCREEN_WIDTH ) / 2;
+		x = ( cgs.screenWidth ) / 2;
 		y = 60;
 
 		CG_Text_Paint ( x - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, y, 1.0f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM );
@@ -493,7 +493,7 @@ qboolean CG_DrawOldScoreboard( void ) {
 			s = va("%s", CG_GetStringEdString("MP_INGAME", "SIEGETEAM2WIN") );
 		}
 
-		x = ( SCREEN_WIDTH ) / 2;
+		x = ( cgs.screenWidth ) / 2;
 		y = 60;
 
 		CG_Text_Paint ( x - CG_Text_Width ( s, 1.0f, FONT_MEDIUM ) / 2, y, 1.0f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM );

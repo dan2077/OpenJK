@@ -185,32 +185,7 @@ qboolean UI_OutOfMemory( void ) {
 	return outOfMemory;
 }
 
-void UI_Set2DRatio(void)
-{
-	float ratio = 0.0f;
-	glconfig_t *glconfig;
-
-#ifdef _CGAME
-	glconfig = &cgs.glconfig;
-#elif defined(UI_BUILD)
-	glconfig = &uiInfo.uiDC.glconfig;
-#endif
-
-	if (!glconfig)
-		return;
-
-	if (cl_ratioFix.integer) // shared with UI module
-		ratio = (float)(SCREEN_WIDTH * glconfig->vidHeight) / (float)(SCREEN_HEIGHT * glconfig->vidWidth);
-	else
-		ratio = 1.0f;
-
-#ifdef _CGAME
-	cgs.widthRatioCoef = ratio;
-#elif defined(UI_BUILD)
-	uiInfo.uiDC.widthRatioCoef = ratio;
-#endif
-}
-
+extern void UI_UpdateWidescreen(void);
 #define HASH_TABLE_SIZE 2048
 /*
 ================
@@ -6900,7 +6875,7 @@ void Menu_Paint(menuDef_t *menu, qboolean forcePaint) {
 	if (menu->fullScreen) {
 		// implies a background shader
 		// FIXME: make sure we have a default shader if fullscreen is set with no background
-		DC->drawHandlePic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, menu->window.background );
+		DC->drawHandlePic( 0, 0, DC->screenWidth, DC->screenHeight, menu->window.background );
 	} else if (menu->window.background) {
 		// this allows a background shader without being full screen
 		//UI_DrawHandlePic(menu->window.rect.x, menu->window.rect.y, menu->window.rect.w, menu->window.rect.h, menu->backgroundShader);

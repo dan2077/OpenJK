@@ -54,7 +54,6 @@ static void CG_TeamOverlayChange( void ) {
 }
 
 extern void CG_ClearThirdPersonDamp(void);
-extern void UI_Set2DRatio(void);
 extern void CG_LoadHud_f(void);
 static void CG_UpdateHUD(void) {
 	cgs.newHud = qfalse;

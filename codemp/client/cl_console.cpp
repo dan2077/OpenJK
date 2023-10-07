@@ -87,7 +87,7 @@ void Con_MessageMode_f (void) {	//yell
 	chat_playerNum = -1;
 	chat_team = qfalse;
 	Field_Clear( &chatField );
-	chatField.widthInChars = 30 / cls.widthRatioCoef;
+	chatField.widthInChars = 30;
 	Key_SetCatcher( Key_GetCatcher( ) ^ KEYCATCH_MESSAGE );
 }
 
@@ -100,7 +100,7 @@ void Con_MessageMode2_f (void) {	//team chat
 	chat_playerNum = -1;
 	chat_team = qtrue;
 	Field_Clear( &chatField );
-	chatField.widthInChars = 25 / cls.widthRatioCoef;
+	chatField.widthInChars = 25;
 	Key_SetCatcher( Key_GetCatcher( ) ^ KEYCATCH_MESSAGE );
 }
 
@@ -129,7 +129,7 @@ void Con_MessageMode3_f (void) {	//target chat
 	}
 	chat_team = qfalse;
 	Field_Clear( &chatField );
-	chatField.widthInChars = 26 / cls.widthRatioCoef;
+	chatField.widthInChars = 26;
 	Key_SetCatcher( Key_GetCatcher( ) ^ KEYCATCH_MESSAGE );
 }
 
@@ -153,7 +153,7 @@ void Con_MessageMode4_f (void)
 	}
 	chat_team = qfalse;
 	Field_Clear( &chatField );
-	chatField.widthInChars = 30 / cls.widthRatioCoef;
+	chatField.widthInChars = 30;
 
 	Key_SetCatcher( Key_GetCatcher( ) ^ KEYCATCH_MESSAGE );
 }
@@ -920,7 +920,7 @@ void Con_DrawNotify (void)
 			chattext = SE_GetString("MP_SVGAME", "SAY");
 		}
 
-		SCR_DrawStringExt2(8 * cls.widthRatioCoef, v, BIGCHAR_WIDTH*cls.widthRatioCoef, BIGCHAR_HEIGHT, chattext, chatColour, qfalse, qfalse);
+		SCR_DrawStringExt2(8, v, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, chattext, chatColour, qfalse, qfalse);
 		skip = strlen(chattext) + 1;
 		Field_BigDraw( &chatField, skip * BIGCHAR_WIDTH, v,
 			SCREEN_WIDTH - ( skip + 1 ) * BIGCHAR_WIDTH, qtrue, qtrue );
@@ -976,8 +976,7 @@ void Con_DrawSolidConsole( float frac ) {
 			re->SetColor(NULL);
 		}
 
-		//re->DrawStretchPic(0, 0, SCREEN_WIDTH, (float)y, 0, 0 + (cls.widthRatioCoef / 4), 1, 1 - (cls.widthRatioCoef / 4), cls.consoleShader);
-		if (con_ratioFix->integer && frac <= 0.5f && cls.widthRatioCoef < 1.0f) // && cls.widthRatioCoef < 1.0f)
+		if (con_ratioFix->integer && frac <= 0.5f) // && cls.widthRatioCoef < 1.0f)
 			re->DrawStretchPic(0, 0, SCREEN_WIDTH, (float)y, 0, 1 - cls.widthRatioCoef, 1, 0 + cls.widthRatioCoef, cls.consoleShader);
 		else
 			re->DrawStretchPic(0, 0, SCREEN_WIDTH, (float)y, 0, 0, 1, 1, cls.consoleShader);

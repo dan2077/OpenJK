@@ -22,7 +22,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "ui_local.h"
-
+extern void UI_UpdateWidescreen(void);
 //
 // Cvar callbacks
 //

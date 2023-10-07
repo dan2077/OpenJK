@@ -1623,7 +1623,7 @@ static void CG_CenterPrint_f( void ) {
 	char strEd[MAX_STRINGED_SV_STRING] = {0};
 
 	CG_CheckSVStringEdRef( strEd, CG_Argv( 1 ) );
-	CG_CenterPrint( strEd, SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH );
+	CG_CenterPrint( strEd, cgs.screenHeight * 0.30, BIGCHAR_WIDTH );
 
 	if ((cg_logChat.integer & JAPRO_CHATLOG_ENABLE) && (cg_logChat.integer & JAPRO_CHATLOG_CENTERPRINT))
 		CG_LogPrintf(cg.log.file, "%s\n", strEd); //Log server center prints?
@@ -1637,7 +1637,7 @@ static void CG_CenterPrintSE_f( void ) {
 		x++;
 
 	trap->SE_GetStringTextString( x, strEd, MAX_STRINGED_SV_STRING );
-	CG_CenterPrint( strEd, SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH );
+	CG_CenterPrint( strEd, cgs.screenHeight * 0.30, BIGCHAR_WIDTH );
 
 	if ((cg_logChat.integer & JAPRO_CHATLOG_ENABLE) && (cg_logChat.integer & JAPRO_CHATLOG_CENTERPRINT))
 		CG_LogPrintf(cg.log.file, "%s\n", strEd); //Log server center prints?

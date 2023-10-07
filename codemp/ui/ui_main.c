@@ -467,6 +467,52 @@ int UI_ParseAnimationFile(const char *filename, animation_t *animset, qboolean i
 	return usedIndex;
 }
 
+/*
+=================
+UI_UpdateWidescreen
+=================
+*/
+static void UI_UpdateWidescreen(void) {
+    float		vidWidth = uiInfo.uiDC.glconfig.vidWidth;
+    float		vidHeight = uiInfo.uiDC.glconfig.vidHeight;
+    qboolean	portrait;
+    qboolean	landscape;
+
+    if (ui_widescreen.integer) {
+        landscape = (3 * vidWidth >= 4 * vidHeight);
+        portrait = !landscape;
+    } else {
+        portrait = qfalse;
+        landscape = qfalse;
+    }
+
+    if (landscape) {
+        uiInfo.screenWidth = (float)SCREEN_HEIGHT * vidWidth / vidHeight;
+        uiInfo.screenHeight = (float)SCREEN_HEIGHT;
+        uiInfo.cursorXScale = (SCREEN_WIDTH * vidHeight) / (SCREEN_HEIGHT * vidWidth);
+        uiInfo.cursorYScale = 1.0f;
+    } else if (portrait) {
+        uiInfo.screenWidth = (float)SCREEN_WIDTH;
+        uiInfo.screenHeight = (float)SCREEN_HEIGHT;
+        uiInfo.cursorXScale = 1.0f;
+        uiInfo.cursorYScale = 1.0f;
+    } else {
+        uiInfo.screenWidth = (float)SCREEN_WIDTH;
+        uiInfo.screenHeight = (float)SCREEN_HEIGHT;
+        uiInfo.cursorXScale = 1.0f;
+        uiInfo.cursorYScale = (SCREEN_HEIGHT * vidWidth) / (SCREEN_WIDTH * vidHeight);
+    }
+
+    uiInfo.screenXFactor = (float)SCREEN_WIDTH / uiInfo.screenWidth;
+    uiInfo.screenXFactorInv = uiInfo.screenWidth / (float)SCREEN_WIDTH;
+
+    uiInfo.screenYFactor = (float)SCREEN_HEIGHT / uiInfo.screenHeight;
+    uiInfo.screenYFactorInv = uiInfo.screenHeight / (float)SCREEN_HEIGHT;
+
+    uiInfo.uiDC.screenWidth = uiInfo.screenWidth;
+    uiInfo.uiDC.screenHeight = uiInfo.screenHeight;
+}
+
 //menuDef_t *Menus_FindByName(const char *p);
 void Menu_ShowItemByName(menuDef_t *menu, const char *p, qboolean bShow);
 
@@ -755,15 +801,17 @@ int MenuFontToHandle(int iMenuFont)
 int Text_Width(const char *text, float scale, int iMenuFont)
 {
 	int iFontIndex = MenuFontToHandle(iMenuFont);
-
-	return trap->R_Font_StrLenPixels(text, iFontIndex, scale);
+    float w;
+    w = trap->R_Font_StrLenPixels(text, iFontIndex, scale) * uiInfo.screenXFactor;
+    return w;
 }
 
 int Text_Height(const char *text, float scale, int iMenuFont)
 {
 	int iFontIndex = MenuFontToHandle(iMenuFont);
-
-	return trap->R_Font_HeightPixels(iFontIndex, scale);
+    float w;
+    w = trap->R_Font_HeightPixels(iFontIndex, scale) * uiInfo.screenXFactor;
+    return w;
 }
 
 void Text_Paint(float x, float y, float scale, vec4_t color, const char *text, float adjust, int limit, int style, int iMenuFont)
@@ -784,7 +832,8 @@ void Text_Paint(float x, float y, float scale, vec4_t color, const char *text, f
 	case  ITEM_TEXTSTYLE_OUTLINESHADOWED:	iStyleOR = (int)STYLE_DROPSHADOW;break;	// JK2 drop shadow
 	case  ITEM_TEXTSTYLE_SHADOWEDMORE:		iStyleOR = (int)STYLE_DROPSHADOW;break;	// JK2 drop shadow
 	}
-
+    x *= uiInfo.screenXFactorInv;
+    y *= uiInfo.screenYFactorInv;
 	trap->R_Font_DrawString(	x,		// int ox
 							y,		// int oy
 							text,	// const char *text
@@ -1082,8 +1131,8 @@ void UI_SetActiveMenu( uiMenuCommand_t menu ) {
 
 void UI_DrawCenteredPic(qhandle_t image, int w, int h) {
 	int x, y;
-	x = (SCREEN_WIDTH - w) / 2;
-	y = (SCREEN_HEIGHT - h) / 2;
+	x = (uiInfo.screenWidth - w) / 2;
+	y = (uiInfo.screenHeight - h) / 2;
 	UI_DrawHandlePic(x, y, w, h, image);
 }
 
@@ -2129,14 +2178,13 @@ static void UI_DrawMapPreview(rectDef_t *rect, float scale, vec4_t color, qboole
 	if (uiInfo.mapList[map].levelShot > 0) {
 		levelShot = uiInfo.mapList[map].levelShot;
 	}
-	else if (uiInfo.uiDC.widthRatioCoef >= 0.74f && uiInfo.uiDC.widthRatioCoef <= 0.76f) {
-		levelShot = trap->R_RegisterShaderNoMip("menu/art/unknownmap_mp_16_9");
-	}
 
-	if (!levelShot)
-		levelShot = trap->R_RegisterShaderNoMip("menu/art/unknownmap_mp");
-
-	UI_DrawHandlePic(rect->x, rect->y, rect->w, rect->h, levelShot);
+	if (!levelShot && !ui_widescreen.integer) {
+        levelShot = trap->R_RegisterShaderNoMip("menu/art/unknownmap_mp");
+    }else if (!levelShot && ui_widescreen.integer) {
+        levelShot = trap->R_RegisterShaderNoMip("menu/art/unknownmap_mp_16_9");
+    }
+    UI_DrawHandlePic(rect->x, rect->y, rect->w, rect->h, levelShot);
 }
 
 static void UI_DrawMapCinematic(rectDef_t *rect, float scale, vec4_t color, qboolean net) {
@@ -2408,7 +2456,7 @@ static void UI_DrawNetMapPreview(rectDef_t *rect, float scale, vec4_t color) {
 	if (uiInfo.serverStatus.currentServerPreview > 0) {
 		previewImage = uiInfo.serverStatus.currentServerPreview;
 	}
-	else if (uiInfo.uiDC.widthRatioCoef >= 0.74f && uiInfo.uiDC.widthRatioCoef <= 0.76f) {
+	else if (ui_widescreen.integer) {
 		previewImage = trap->R_RegisterShaderNoMip("menu/art/unknownmap_mp_16_9");
 	}
 	
@@ -11628,7 +11676,9 @@ void UI_Init( qboolean inGameLoad ) {
 	// cache redundant calulations
 	trap->GetGlconfig( &uiInfo.uiDC.glconfig );
 
-	// for 640x480 virtualized screen
+    UI_UpdateWidescreen();
+
+    // for 640x480 virtualized screen
 	uiInfo.uiDC.yscale = uiInfo.uiDC.glconfig.vidHeight * (1.0/SCREEN_HEIGHT);
 	uiInfo.uiDC.xscale = uiInfo.uiDC.glconfig.vidWidth * (1.0/SCREEN_WIDTH);
 
@@ -11705,7 +11755,6 @@ void UI_Init( qboolean inGameLoad ) {
 	Init_Display(&uiInfo.uiDC);
 
 	UI_RegisterCvars();
-	UI_Set2DRatio();
 
 	String_Init();
 
@@ -11834,7 +11883,9 @@ void UI_Refresh( int realtime )
 	// draw cursor
 	UI_SetColor( NULL );
 	if (Menu_Count() > 0 && (trap->Key_GetCatcher() & KEYCATCH_UI)) {
-		UI_DrawHandlePic(uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory, 40.0f * uiInfo.uiDC.widthRatioCoef, 40.0f, uiInfo.uiDC.Assets.cursor);
+        float	cursorx = uiInfo.uiDC.cursorx * uiInfo.screenXFactorInv;
+        float	cursory = uiInfo.uiDC.cursory * uiInfo.screenYFactorInv;
+		UI_DrawHandlePic(cursorx, cursory, 40.0f, 40.0f, uiInfo.uiDC.Assets.cursor);
 		//UI_DrawHandlePic( uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory, 48, 48, uiInfo.uiDC.Assets.cursor);
 	}
 
@@ -11974,14 +12025,24 @@ UI_MouseEvent
 */
 void UI_MouseEvent( int dx, int dy )
 {
+    // hack for portrait mode. virtualScreenHeightOff should be
+    // private to Widescreen functions
+    float	xScale = ui_sensitivity.value;
+    float	yscale = ui_sensitivity.value;
+
+    if (ui_widescreenCursorScale.integer) {
+        xScale *= uiInfo.cursorXScale;
+        yscale *= uiInfo.cursorYScale;
+    }
+
 	// update mouse screen position
-	uiInfo.uiDC.cursorx += dx / uiInfo.uiDC.xscale;
+	uiInfo.uiDC.cursorx += dx * xScale;
 	if (uiInfo.uiDC.cursorx < 0)
 		uiInfo.uiDC.cursorx = 0;
 	else if (uiInfo.uiDC.cursorx > SCREEN_WIDTH)
 		uiInfo.uiDC.cursorx = SCREEN_WIDTH;
 
-	uiInfo.uiDC.cursory += dy / uiInfo.uiDC.yscale;
+	uiInfo.uiDC.cursory += dy * yscale;
 	if (uiInfo.uiDC.cursory < 0)
 		uiInfo.uiDC.cursory = 0;
 	else if (uiInfo.uiDC.cursory > SCREEN_HEIGHT)
@@ -12045,7 +12106,7 @@ static void UI_DisplayDownloadInfo( const char *downloadName, float centerPoint,
 
 	vec4_t colorLtGreyAlpha = {0, 0, 0, .5};
 
-	UI_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, colorLtGreyAlpha );
+	UI_FillRect( 0, 0, uiInfo.screenWidth, uiInfo.screenHeight, colorLtGreyAlpha );
 
 	s = GetCRDelineatedString("MENUS","DOWNLOAD_STUFF", 0);	// "Downloading:"
 	Q_strncpyz(sDownLoading,s?s:"", sizeof(sDownLoading));
@@ -12136,7 +12197,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 
 	char sStringEdTemp[256];
 
-	menuDef_t *menu = (uiInfo.uiDC.widthRatioCoef >= 0.74f && uiInfo.uiDC.widthRatioCoef <= 0.76f) ? Menus_FindByName("Connect_16_9") : Menus_FindByName("Connect");
+	menuDef_t *menu = (ui_widescreen.integer) ? Menus_FindByName("Connect_16_9") : Menus_FindByName("Connect");
 
 	if (!menu)
 		menu = Menus_FindByName("Connect");
@@ -12146,11 +12207,11 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	}
 
 	if (!overlay) {
-		centerPoint = SCREEN_WIDTH / 2;
+		centerPoint = 0.5f * uiInfo.screenWidth;
 		yStart = 130;
 		scale = 1.0f;	// -ste
 	} else {
-		centerPoint = SCREEN_WIDTH / 2;
+		centerPoint = 0.5f * uiInfo.screenWidth;
 		yStart = 32;
 		scale = 1.0f;	// -ste
 		return;

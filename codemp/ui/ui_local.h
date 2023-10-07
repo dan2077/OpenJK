@@ -396,6 +396,15 @@ typedef struct uiInfo_s {
 
 	char				hat[MAX_COSMETIC_LENGTH];
 	char				cape[MAX_COSMETIC_LENGTH];
+
+    float               screenWidth;
+    float               screenHeight;
+    float               cursorXScale;
+    float               cursorYScale;
+    float               screenXFactor;
+    float               screenYFactor;
+    float               screenXFactorInv;
+    float               screenYFactorInv;
 } uiInfo_t;
 extern uiInfo_t uiInfo;
 

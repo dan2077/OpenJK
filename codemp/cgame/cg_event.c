@@ -316,9 +316,9 @@ static void CG_Obituary( entityState_t *ent ) {
 
             if (cg_killMessage.integer == 1 ||
                 cg_killMessage.integer == 2)//JAPRO - Clientside - Toggle Kill award message
-                CG_CenterPrintMultiKill(s, SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH);
+                CG_CenterPrintMultiKill(s, cgs.screenHeight * 0.30, BIGCHAR_WIDTH);
             else if (cg_killMessage.integer > 2)//JAPRO - Clientside - Toggle Kill award message
-                CG_CenterPrintMultiKill(s, SCREEN_HEIGHT * 0.10, BIGCHAR_WIDTH);
+                CG_CenterPrintMultiKill(s, cgs.screenHeight * 0.10, BIGCHAR_WIDTH);
         }
 
         // check for double client messages
@@ -522,7 +522,7 @@ static void CG_UseItem( centity_t *cent ) {
 	// print a message if the local player
 	if ( es->number == cg.snap->ps.clientNum ) {
 		if ( !itemNum ) {
-			//CG_CenterPrint( "No item to use", SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH );
+			//CG_CenterPrint( "No item to use", cgs.screenHeight * 0.30, BIGCHAR_WIDTH );
 		}
 	}
 
@@ -2136,7 +2136,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 					const char *strText = CG_GetStringEdString("MP_INGAME", "PICKUPLINE");
 
 					//Com_Printf("%s %s\n", strText, showPowersName[index]);
-					CG_CenterPrint( va("%s %s\n", strText, CG_GetStringEdString("SP_INGAME",showPowersName[index])), SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH );
+					CG_CenterPrint( va("%s %s\n", strText, CG_GetStringEdString("SP_INGAME",showPowersName[index])), cgs.screenHeight * 0.30, BIGCHAR_WIDTH );
 				}
 
 				//Show the player their force selection bar in case picking the holocron up changed the current selection

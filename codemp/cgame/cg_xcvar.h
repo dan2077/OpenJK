@@ -131,7 +131,7 @@ XCVAR_DEF( cg_zoomFov,							"30.0",	NULL,								CVAR_ARCHIVE )
 XCVAR_DEF( cg_fleshSparks,						"7",	NULL,								CVAR_ARCHIVE )
 XCVAR_DEF( cg_noFX,								"0",	NULL,								CVAR_ARCHIVE )
 XCVAR_DEF( cg_noTeleFX,							"0",	NULL,								CVAR_ARCHIVE )
-XCVAR_DEF( cl_ratioFix,							"1",	UI_Set2DRatio,						CVAR_ARCHIVE ) // Shared with UI module
+XCVAR_DEF( cg_widescreen,						"1",	NULL,				CVAR_ARCHIVE ) // Shared with UI module
 
 //Features
 XCVAR_DEF( cg_simulatedProjectiles,				"0",	NULL,					CVAR_ARCHIVE )

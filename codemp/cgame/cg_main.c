@@ -3092,10 +3092,6 @@ Ghoul2 Insert End
 	cgs.media.bdecal_burn1 = trap->R_RegisterShader("gfx/damage/bodybigburnmark1");
 	cgs.media.mSaberDamageGlow = trap->R_RegisterShader("gfx/effects/saberDamageGlow");
 
-	CG_RegisterCvars();
-
-	CG_InitConsoleCommands();
-
 	// chatlogs
 	if (cg_logChat.integer & JAPRO_CHATLOG_ENABLE) {
 		struct tm		*newtime;
@@ -3124,7 +3120,12 @@ Ghoul2 Insert End
 	trap->GetGlconfig( &cgs.glconfig );
 	cgs.screenXScale = cgs.glconfig.vidWidth / SCREEN_WIDTH;
 	cgs.screenYScale = cgs.glconfig.vidHeight / SCREEN_HEIGHT;
-	UI_Set2DRatio();
+
+    CG_RegisterCvars();
+
+    CG_InitConsoleCommands();
+
+    CG_UpdateWidescreen();
 
 	// get the gamestate from the client system
 	trap->GetGameState( &cgs.gameState );
@@ -3975,4 +3976,33 @@ Q_EXPORT intptr_t vmMain( int command, intptr_t arg0, intptr_t arg1, intptr_t ar
 		break;
 	}
 	return -1;
+}
+
+/*
+===================
+CG_UpdateWidescreen
+===================
+*/
+static void CG_UpdateWidescreen(void) {
+    if (cg_widescreen.integer) {
+        if ( cgs.glconfig.vidWidth >= cgs.glconfig.vidHeight ) {
+            cgs.screenWidth = (float)SCREEN_HEIGHT * cgs.glconfig.vidWidth / cgs.glconfig.vidHeight;
+            cgs.screenHeight = (float)SCREEN_HEIGHT;
+        } else {
+            cgs.screenWidth = (float)SCREEN_WIDTH;
+            cgs.screenHeight = (float)SCREEN_WIDTH * cgs.glconfig.vidHeight / cgs.glconfig.vidWidth;
+        }
+    } else {
+        cgs.screenWidth = (float)SCREEN_WIDTH;
+        cgs.screenHeight = (float)SCREEN_HEIGHT;
+    }
+
+    cgs.screenXFactor = (float)SCREEN_WIDTH / cgs.screenWidth;
+    cgs.screenXFactorInv = cgs.screenWidth / (float)SCREEN_WIDTH;
+
+    cgs.screenYFactor = (float)SCREEN_HEIGHT / cgs.screenHeight;
+    cgs.screenYFactorInv = cgs.screenHeight / (float)SCREEN_HEIGHT;
+
+    cgDC.screenWidth = cgs.screenWidth;
+    cgDC.screenHeight = cgs.screenHeight;
 }

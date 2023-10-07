@@ -2233,8 +2233,14 @@ typedef struct cgs_s {
 //[JAPRO - Clientside - All - Add cinfo variables to get cinfo from server japlus and japro servers - End]
 
 	qboolean  newHud;
-	float widthRatioCoef;
-	qboolean  jaPROEngine; //egh
+	float screenWidth;
+    float screenHeight;
+    float screenXFactor;
+    float screenYFactor;
+    float screenXFactorInv;
+    float screenYFactorInv;
+
+    qboolean  jaPROEngine; //egh
 
 	//
 	// locally derived information from gamestate
@@ -2641,6 +2647,7 @@ void CG_DrawOldTourneyScoreboard( void );
 //
 qboolean CG_ConsoleCommand( void );
 void CG_InitConsoleCommands( void );
+void CG_UpdateWidescreen( void );
 
 //
 // cg_servercmds.c

@@ -88,7 +88,7 @@ void HUD_DrawObituary(void) {
 
     y = 10.0f + kfYOffset;
     padding = OBITUARY_PADDING_SCALAR;
-    iconWidth = (iconSize * cgs.widthRatioCoef);
+    iconWidth = iconSize;
     iconHeight = iconSize;
 
     for (p = hudObituary; p < hudObituary + hudNumObituary; p++) {
@@ -168,11 +168,11 @@ void HUD_DrawObituary(void) {
             textHeight = fmaxf(killerTextHeight, victimTextHeight);
         }
         maxHeight = fmaxf(iconHeight, textHeight);
-        xPadding = (padding * maxHeight * cgs.widthRatioCoef);
+        xPadding = (padding * maxHeight);
         yPadding = (padding * maxHeight);
         boxCenterY = y + ((maxHeight + yPadding) / 2.0f);
         victimTextStartY = boxCenterY - 0.75f * victimTextHeight;
-        boxCenterX = ((maxHeight * cgs.widthRatioCoef + xPadding) / 2.0f);
+        boxCenterX = ((maxHeight + xPadding) / 2.0f);
         if(!suicide) {
             killerTextStartY = boxCenterY - 0.75f * killerTextHeight;
             totalWidth = killerTextWidth + victimTextWidth + (3.0f * xPadding) + (2.0f * boxCenterX);
@@ -182,13 +182,13 @@ void HUD_DrawObituary(void) {
         //offset the allignment
         switch (killfeedAlignment){
             case KF_RIGHT:
-                x = SCREEN_WIDTH - totalWidth - (10.0f + kfXOffset) * cgs.widthRatioCoef;
+                x = cgs.screenWidth - totalWidth - (10.0f + kfXOffset);
                 break;
             case KF_LEFT:
-                x = (10.0f + kfXOffset) * cgs.widthRatioCoef;
+                x = (10.0f + kfXOffset);
                 break;
             case KF_CENTER:
-                x = (SCREEN_WIDTH - totalWidth) * 0.5f + kfXOffset;
+                x = (cgs.screenWidth - totalWidth) * 0.5f + kfXOffset;
                 break;
             default:
                 x = kfXOffset;

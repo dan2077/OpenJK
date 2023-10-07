@@ -979,11 +979,11 @@ void CG_DrawIconBackground(void)
 	}
 
 	x2 = 30.0f;
-	y2 = SCREEN_HEIGHT-70.0f;
+	y2 = cgs.screenHeight-70.0f;
 
 	//JK2HUD
 	prongLeftX = x2 + 37.0f;
-	prongRightX = SCREEN_WIDTH - (36.0f + x2)*cgs.widthRatioCoef;
+	prongRightX = cgs.screenWidth - (36.0f + x2);
 
 	if (inTime > wpTime)
 	{
@@ -1028,7 +1028,7 @@ void CG_DrawIconBackground(void)
 			xAdd = 8.0f*cg.iconHUDPercent;
 
 			height = (60.0f*cg.iconHUDPercent);
-			if (JK2HUD) { //background needs to be stretched by cgs.widthRatioCoef to line up with the prongs
+			if (JK2HUD) {
 				CG_DrawPic( x2+60.0f, y2+30.0f+yOffset, 460.0f, -height, drawType);	// Top half
 				CG_DrawPic( x2+60.0f, y2+30.0f-2.0f+yOffset, 460.0f, height, drawType);	// Bottom half
 			}
@@ -1040,8 +1040,8 @@ void CG_DrawIconBackground(void)
 
 		if (JK2HUD) {
 			trap->R_SetColor(hudTintColor);
-			CG_DrawPic((prongLeftX + xAdd)*cgs.widthRatioCoef, y2 - 10.0f, 40.0f*cgs.widthRatioCoef, 80.0f, cgs.media.JK2weaponProngsOff);
-			CG_DrawPic(prongRightX - xAdd*cgs.widthRatioCoef, y2 - 10.0f, -40.0f*cgs.widthRatioCoef, 80.0f, cgs.media.JK2weaponProngsOff);
+			CG_DrawPic((prongLeftX + xAdd), y2 - 10.0f, 40.0f, 80.0f, cgs.media.JK2weaponProngsOff);
+			CG_DrawPic(prongRightX - xAdd, y2 - 10.0f, -40.0f, 80.0f, cgs.media.JK2weaponProngsOff);
 		}
 
 		return;
@@ -1068,7 +1068,7 @@ void CG_DrawIconBackground(void)
 		cg.iconHUDPercent=1;
 	}
 
-	if (JK2HUD) {  //background needs to be stretched by cgs.widthRatioCoef to line up with the prongs
+	if (JK2HUD) {
 		trap->R_SetColor(colorTable[CT_WHITE]);
 		height = 60.0f*cg.iconHUDPercent;
 		CG_DrawPic(x2 + 60.0f, y2 + 30.0f + yOffset, 460.0f, -height, drawType);	// Top half
@@ -1096,8 +1096,8 @@ void CG_DrawIconBackground(void)
 	if (JK2HUD) {
 		trap->R_SetColor(colorTable[CT_WHITE]);
 		xAdd = 8.0f*cg.iconHUDPercent;
-		CG_DrawPic((prongLeftX + xAdd)*cgs.widthRatioCoef, y2 - 10.0f, 40.0f*cgs.widthRatioCoef, 80.0f, background);
-		CG_DrawPic(prongRightX - xAdd*cgs.widthRatioCoef, y2 - 10.0f, -40.0f*cgs.widthRatioCoef, 80.0f, background);
+		CG_DrawPic((prongLeftX + xAdd), y2 - 10.0f, 40.0f, 80.0f, background);
+		CG_DrawPic(prongRightX - xAdd, y2 - 10.0f, -40.0f, 80.0f, background);
 	}
 
 }
@@ -1224,13 +1224,13 @@ void CG_DrawWeaponSelect( void ) {
 	}
 
 	// Max number of icons on the side 
-	if (cgs.widthRatioCoef >= 0.8f) { //4:3 nd 16:10
+	if (!cg_widescreen.integer) { //4:3 nd 16:10
 		if (cg_hudFiles.integer != 1) //tested these numbers in 1280x1024
 			sideMax = 3;
 		else
 			sideMax = 4;
 	}
-	else if (cgs.widthRatioCoef >= 0.625f) { //tested these numbers in 1600x900
+	else if (cg_widescreen.integer) { //tested these numbers in 1600x900
 		if (cg_hudFiles.integer != 1)
 			sideMax = 5;
 		else
@@ -1275,8 +1275,8 @@ void CG_DrawWeaponSelect( void ) {
 	bigIconSize = 80;
 	pad = 12;
 
-	x = 320;
-	y = 410;
+    x = 0.5f * cgs.screenWidth;
+    y = 410;
 
 	// Background
 //	memcpy(calcColor, colorTable[CT_WHITE], sizeof(vec4_t));
@@ -1286,7 +1286,7 @@ void CG_DrawWeaponSelect( void ) {
 	// Left side ICONS
 	trap->R_SetColor(colorTable[CT_WHITE]);
 	// Work backwards from current icon
-	holdX = x - ((bigIconSize/2) + pad + smallIconSize) * cgs.widthRatioCoef; //JAPRO - Clientside - Ratio fix
+	holdX = x - ((bigIconSize/2) + pad + smallIconSize);
 //	height = smallIconSize * 1;//cg.iconHUDPercent;
 	drewConc = qfalse;
 
@@ -1334,7 +1334,7 @@ void CG_DrawWeaponSelect( void ) {
                 value = cg.predictedPlayerState.ammo[weaponData[i].ammoIndex];
 
                 Com_sprintf(ammoStr, sizeof(ammoStr), "%i", value);
-                CG_Text_Paint(holdX - CG_Text_Width(ammoStr, 0.6f, FONT_SMALL2) / 2.0f + (smallIconSize / 2) * cgs.widthRatioCoef,
+                CG_Text_Paint(holdX - CG_Text_Width(ammoStr, 0.6f, FONT_SMALL2) / 2.0f + (smallIconSize / 2) ,
                               y + yOffset,
                               0.6f,
                               colorTable[CT_YELLOW],
@@ -1347,14 +1347,14 @@ void CG_DrawWeaponSelect( void ) {
 			trap->R_SetColor(colorTable[CT_WHITE]);
             if (!CG_WeaponCheck(i))
 			{
-				CG_DrawPic( holdX, y+10+yOffset, smallIconSize * cgs.widthRatioCoef, smallIconSize, /*weaponInfo->weaponIconNoAmmo*/cgs.media.weaponIcons_NA[i] ); //JAPRO - Clientside - Ratio fix
+				CG_DrawPic( holdX, y+10+yOffset, smallIconSize , smallIconSize, /*weaponInfo->weaponIconNoAmmo*/cgs.media.weaponIcons_NA[i] ); //JAPRO - Clientside - Ratio fix
 			}
 			else
 			{
-				CG_DrawPic( holdX, y+10+yOffset, smallIconSize * cgs.widthRatioCoef, smallIconSize, /*weaponInfo->weaponIcon*/weaponIcon(i) ); //JAPRO - Clientside - Ratio fix
+				CG_DrawPic( holdX, y+10+yOffset, smallIconSize , smallIconSize, /*weaponInfo->weaponIcon*/weaponIcon(i) ); //JAPRO - Clientside - Ratio fix
 			}
 
-			holdX -= (smallIconSize+pad) * cgs.widthRatioCoef; //JAPRO - Clientside - Ratio fix
+			holdX -= (smallIconSize+pad) ; //JAPRO - Clientside - Ratio fix
 		}
 		if ( i == WP_CONCUSSION )
 		{
@@ -1393,11 +1393,11 @@ void CG_DrawWeaponSelect( void ) {
         }
 		if (!CG_WeaponCheck(cg.weaponSelect))
 		{
-			CG_DrawPic( x-(bigIconSize/2 * cgs.widthRatioCoef), (y-((bigIconSize-smallIconSize)/2))+10+yOffset, bigIconSize * cgs.widthRatioCoef, bigIconSize, cgs.media.weaponIcons_NA[cg.weaponSelect] ); //JAPRO - Clientside - Ratio fix
+			CG_DrawPic( x-(bigIconSize/2 ), (y-((bigIconSize-smallIconSize)/2))+10+yOffset, bigIconSize , bigIconSize, cgs.media.weaponIcons_NA[cg.weaponSelect] ); //JAPRO - Clientside - Ratio fix
 		}
 		else
 		{
-			CG_DrawPic( x-(bigIconSize/2 * cgs.widthRatioCoef), (y-((bigIconSize-smallIconSize)/2))+10+yOffset, bigIconSize * cgs.widthRatioCoef, bigIconSize, weaponIcon(cg.weaponSelect) ); //JAPRO - Clientside - Ratio fix
+			CG_DrawPic( x-(bigIconSize/2 ), (y-((bigIconSize-smallIconSize)/2))+10+yOffset, bigIconSize , bigIconSize, weaponIcon(cg.weaponSelect) ); //JAPRO - Clientside - Ratio fix
 		}
 	}
 
@@ -1416,7 +1416,7 @@ void CG_DrawWeaponSelect( void ) {
 
 	// Right side ICONS
 	// Work forwards from current icon
-	holdX = x + ((bigIconSize/2) + pad) * cgs.widthRatioCoef; //JAPRO - Clientside - Ratio fix
+	holdX = x + ((bigIconSize/2) + pad) ; //JAPRO - Clientside - Ratio fix
 //	height = smallIconSize * cg.iconHUDPercent;
 	for (iconCnt=1;iconCnt<(sideRightIconCnt+1);i++)
 	{
@@ -1464,7 +1464,7 @@ void CG_DrawWeaponSelect( void ) {
                 value = cg.predictedPlayerState.ammo[weaponData[i].ammoIndex];
 
                 Com_sprintf(ammoStr, sizeof(ammoStr), "%i", value);
-                CG_Text_Paint(holdX - CG_Text_Width(ammoStr, 0.6f, FONT_SMALL2) / 2 + (smallIconSize / 2) * cgs.widthRatioCoef,
+                CG_Text_Paint(holdX - CG_Text_Width(ammoStr, 0.6f, FONT_SMALL2) / 2 + (smallIconSize / 2) ,
                               y + yOffset,
                               0.6f,
                               colorTable[CT_YELLOW],
@@ -1477,15 +1477,15 @@ void CG_DrawWeaponSelect( void ) {
             trap->R_SetColor( colorTable[CT_WHITE]);
 			if (!CG_WeaponCheck(i))
 			{
-				CG_DrawPic( holdX, y+10+yOffset, smallIconSize * cgs.widthRatioCoef, smallIconSize, cgs.media.weaponIcons_NA[i] ); //JAPRO - Clientside - Ratio fix
+				CG_DrawPic( holdX, y+10+yOffset, smallIconSize , smallIconSize, cgs.media.weaponIcons_NA[i] ); //JAPRO - Clientside - Ratio fix
 			}
 			else
 			{
-				CG_DrawPic( holdX, y+10+yOffset, smallIconSize * cgs.widthRatioCoef, smallIconSize, weaponIcon(i) ); //JAPRO - Clientside - Ratio fix
+				CG_DrawPic( holdX, y+10+yOffset, smallIconSize , smallIconSize, weaponIcon(i) ); //JAPRO - Clientside - Ratio fix
 			}
 
 
-			holdX += (smallIconSize+pad) * cgs.widthRatioCoef; //JAPRO - Clientside - Ratio fix
+			holdX += (smallIconSize+pad) ; //JAPRO - Clientside - Ratio fix
 		}
 		if ( i == WP_CONCUSSION )
 		{
