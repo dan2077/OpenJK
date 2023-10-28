@@ -1001,7 +1001,7 @@ static void CG_DrawSaberStyle( centity_t *cent, menuDef_t *menuHUD)
 					//trap->R_SetColor(hudTintColor);
 
 					CG_DrawPic(
-							 cgs.screenWidth - (cgs.screenWidth - focusItem->window.rect.x) * cgs.widthRatioCoef,
+							 cgs.screenWidth - (cgs.screenWidth - focusItem->window.rect.x),
 							focusItem->window.rect.y,
 							focusItem->window.rect.w,
 							focusItem->window.rect.h,
