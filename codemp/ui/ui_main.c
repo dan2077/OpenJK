@@ -6264,6 +6264,20 @@ void UI_UpdateVideoSetup ( void )
 	trap->Cvar_Set ( "r_inGameVideo", UI_Cvar_VariableString ( "ui_r_inGameVideo" ) );
 	trap->Cvar_Set ( "r_allowExtensions", UI_Cvar_VariableString ( "ui_r_allowExtensions" ) );
 	trap->Cvar_Set ( "cg_shadows", UI_Cvar_VariableString ( "ui_cg_shadows" ) );
+    //Rend2 menu
+    trap->Cvar_Set ( "cl_renderer", UI_Cvar_VariableString ( "ui_cl_renderer" ) );
+    if (!Q_stricmp(UI_Cvar_VariableString ( "ui_cl_renderer" ), "rd-rend2e")) {
+        trap->Cvar_Set ( "r_hdr", UI_Cvar_VariableString ( "ui_r_hdr" ) );
+        trap->Cvar_Set ( "r_tonemap", UI_Cvar_VariableString ( "ui_r_tonemap" ) );
+        trap->Cvar_Set ( "r_autoexposure", UI_Cvar_VariableString ( "ui_r_autoexposure" ) );
+        trap->Cvar_Set ( "r_floatLightmap", UI_Cvar_VariableString ( "ui_r_floatLightmap" ) );
+        trap->Cvar_Set ( "r_deluxemapping", UI_Cvar_VariableString ( "ui_r_deluxemapping" ) );
+        trap->Cvar_Set ( "r_cubemapping", UI_Cvar_VariableString ( "ui_r_cubemapping" ) );
+        trap->Cvar_Set ( "r_cubemappingBounces", UI_Cvar_VariableString ( "ui_r_cubemappingBounces" ) );
+        trap->Cvar_Set ( "r_parallaxmapping", UI_Cvar_VariableString ( "ui_r_parallaxmapping" ) );
+        trap->Cvar_Set ( "r_genNormalMaps", UI_Cvar_VariableString ( "ui_r_genNormalMaps" ) );
+        trap->Cvar_Set ( "r_ssao", UI_Cvar_VariableString ( "ui_r_ssao" ) );
+    }
 	trap->Cvar_Set ( "ui_r_modified", "0" );
 
 	if ( trap->Cvar_VariableValue ( "ui_vidrestart" ) ) {
@@ -6349,7 +6363,7 @@ void UI_GetGeometricDetail ( void ) {
 
 void UI_GetVideoSetup ( void )
 {
-	trap->Cvar_Register ( NULL, "ui_r_glCustom",				"4", CVAR_INTERNAL|CVAR_ARCHIVE );
+    trap->Cvar_Register ( NULL, "ui_r_glCustom",				"4", CVAR_INTERNAL|CVAR_ARCHIVE );
 	
 	// Make sure the cvars are registered as read only.
 	trap->Cvar_Register ( NULL, "ui_aspectratio",				"0", CVAR_ROM|CVAR_INTERNAL );
@@ -6377,9 +6391,23 @@ void UI_GetVideoSetup ( void )
 	trap->Cvar_Register ( NULL, "ui_r_inGameVideo",				"0", CVAR_ROM|CVAR_INTERNAL );
 	trap->Cvar_Register ( NULL, "ui_r_allowExtensions",			"0", CVAR_ROM|CVAR_INTERNAL );
 	trap->Cvar_Register ( NULL, "ui_cg_shadows",				"0", CVAR_ROM|CVAR_INTERNAL );
-	trap->Cvar_Register ( NULL, "ui_r_modified",				"0", CVAR_ROM|CVAR_INTERNAL );
-	trap->Cvar_Register ( NULL, "ui_vidrestart",				"0", CVAR_ROM|CVAR_INTERNAL );
-
+    //Rend2 menu
+    trap->Cvar_Register ( NULL, "ui_cl_renderer",				"0", CVAR_ROM|CVAR_INTERNAL );
+    trap->Cvar_Set ( "ui_cl_renderer",                  UI_Cvar_VariableString ( "cl_renderer" ) );
+    if (!Q_stricmp(UI_Cvar_VariableString ( "ui_cl_renderer" ), "rd-rend2e")) {
+        trap->Cvar_Register ( NULL, "ui_r_hdr",				        "0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_tonemap",				    "0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_autoexposure",			"0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_floatLightmap",			"0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_deluxemapping",			"0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_cubemapping",			    "0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_cubemappingBounces",		"0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_parallaxmapping",		    "0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_genNormalMaps",		    "0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_ssao",	        	    "0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_r_modified",				"0", CVAR_ROM|CVAR_INTERNAL );
+        trap->Cvar_Register ( NULL, "ui_vidrestart",				"0", CVAR_ROM|CVAR_INTERNAL );
+    }
 	// Copy over the real video cvars into their temporary counterparts
 	trap->Cvar_Set ( "ui_r_mode",						UI_Cvar_VariableString ( "r_mode" ) );
 	trap->Cvar_Set ( "ui_r_customWidth",				UI_Cvar_VariableString ( "r_customWidth" ) );
@@ -6408,8 +6436,21 @@ void UI_GetVideoSetup ( void )
 	trap->Cvar_Set ( "ui_r_inGameVideo",				UI_Cvar_VariableString ( "r_inGameVideo" ) );
 	trap->Cvar_Set ( "ui_r_allowExtensions",			UI_Cvar_VariableString ( "r_allowExtensions" ) );
 	trap->Cvar_Set ( "ui_cg_shadows",					UI_Cvar_VariableString ( "cg_shadows" ) );
-	trap->Cvar_Set ( "ui_r_modified",					"0" );
-	trap->Cvar_Set ( "ui_vidrestart",					"0" );
+    //Rend2 menu
+    if (!Q_stricmp(UI_Cvar_VariableString ( "ui_cl_renderer" ), "rd-rend2e")) {
+        trap->Cvar_Set ( "ui_r_hdr",                        UI_Cvar_VariableString ( "r_hdr" ) );
+        trap->Cvar_Set ( "ui_r_tonemap",                    UI_Cvar_VariableString ( "r_tonemap" ) );
+        trap->Cvar_Set ( "ui_r_autoexposure",               UI_Cvar_VariableString ( "r_autoexposure" ) );
+        trap->Cvar_Set ( "ui_r_floatLightmap",              UI_Cvar_VariableString ( "r_floatLightmap" ) );
+        trap->Cvar_Set ( "ui_r_deluxemapping",              UI_Cvar_VariableString ( "r_deluxemapping" ) );
+        trap->Cvar_Set ( "ui_r_cubemapping",                UI_Cvar_VariableString ( "r_cubemapping" ) );
+        trap->Cvar_Set ( "ui_r_cubemappingBounces",         UI_Cvar_VariableString ( "r_cubemappingBounces" ) );
+        trap->Cvar_Set ( "ui_r_parallaxmapping",            UI_Cvar_VariableString ( "r_parallaxmapping" ) );
+        trap->Cvar_Set ( "ui_r_genNormalMaps",              UI_Cvar_VariableString ( "r_genNormalMaps" ) );
+        trap->Cvar_Set ( "ui_r_ssao",                       UI_Cvar_VariableString ( "r_ssao" ) );
+    }
+    trap->Cvar_Set ( "ui_r_modified",					"0" );
+    trap->Cvar_Set ( "ui_vidrestart",					"0" );
 }
 
 void UI_UpdateNetworkSetup ( void ) {

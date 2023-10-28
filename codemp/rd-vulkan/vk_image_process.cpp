@@ -116,8 +116,6 @@ void R_SetColorMappings( void)
         s_intensitytable[i] = j;
     }
 
-    vk_update_post_process_pipelines();
-
     if (glConfig.deviceSupportsGamma) {
         if (vk.fboActive)
             ri.WIN_SetGamma(&glConfig, s_gammatable_linear, s_gammatable_linear, s_gammatable_linear);

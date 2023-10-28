@@ -363,6 +363,18 @@ void vk_create_attachments( void )
         create_depth_attachment( vk.screenMapWidth, vk.screenMapHeight, (VkSampleCountFlagBits)vk.screenMapSamples,
             &vk.screenMap.depth_image, &vk.screenMap.depth_image_view );
         
+        // refraction
+        if ( vk.refractionActive )
+		{
+            uint32_t width = gls.captureWidth / REFRACTION_EXTRACT_SCALE;
+            uint32_t height = gls.captureHeight / REFRACTION_EXTRACT_SCALE;
+
+            usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+            create_color_attachment( width, height, VK_SAMPLE_COUNT_1_BIT, vk.capture_format,
+                usage, &vk.refraction_extract_image, &vk.refraction_extract_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, qfalse );     
+        }
+
         // MSAA
         if (vk.msaaActive) {
             create_color_attachment( glConfig.vidWidth, glConfig.vidHeight, (VkSampleCountFlagBits)vkSamples, vk.color_format, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
@@ -403,6 +415,8 @@ void vk_create_attachments( void )
     VK_SET_OBJECT_NAME( vk.color_image, "color attachment", VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT );
     VK_SET_OBJECT_NAME( vk.color_image_view, "color attachment", VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT );
 
+    VK_SET_OBJECT_NAME( vk.refraction_extract_image, "refraction extract attachment", VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT );
+    VK_SET_OBJECT_NAME( vk.refraction_extract_image_view, "refraction extract attachment", VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT );
 
     VK_SET_OBJECT_NAME( vk.capture.image, "capture image", VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT );
     VK_SET_OBJECT_NAME( vk.capture.image_view, "capture image view", VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT );
@@ -506,6 +520,14 @@ void vk_destroy_attachments( void )
         qvkDestroyImageView(vk.device, vk.color_image_view, NULL);
         vk.color_image = VK_NULL_HANDLE;
         vk.color_image_view = VK_NULL_HANDLE;
+    }
+
+    // color copy
+    if (vk.refraction_extract_image) {
+        qvkDestroyImage(vk.device, vk.refraction_extract_image, NULL);
+        qvkDestroyImageView(vk.device, vk.refraction_extract_image_view, NULL);
+        vk.refraction_extract_image = VK_NULL_HANDLE;
+        vk.refraction_extract_image_view = VK_NULL_HANDLE;
     }
 
     // bloom

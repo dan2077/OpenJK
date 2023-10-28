@@ -252,6 +252,7 @@ void VectorClear( vec3_t vec );
 void VectorCopy( const vec3_t vecIn, vec3_t vecOut );
 float VectorLength( const vec3_t vec );
 float VectorLengthSquared( const vec3_t vec );
+float VectorLengthSquared2(vec2_t const v);
 void VectorNormalizeFast( vec3_t vec );
 float VectorNormalize( vec3_t vec );
 float VectorNormalize2( const vec3_t vec, vec3_t vecOut );

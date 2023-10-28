@@ -50,8 +50,6 @@ void vk_restart_swapchain( const char *funcname )
     vk_create_attachments();
     vk_create_render_passes();
     vk_create_framebuffers();
-    vk_create_bloom_pipelines();
-    vk_create_dglow_pipelines();
 
     vk_update_attachment_descriptors();
     vk_update_post_process_pipelines();

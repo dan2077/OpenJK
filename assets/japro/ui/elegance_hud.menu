@@ -289,6 +289,24 @@ assetGlobalDef
 												// X pos, Y pos, char size, char height
 		}		
 
+		itemDef
+		{
+			name				saberstyle_dual
+			background			"gfx/elegance_hud/saber_dual"
+			forecolor			1 1 1 1
+			rect				-122 80 110 6				// (these positions are relative to the initial position of the menu)
+												// X pos, Y pos, char size, char height
+		}
+
+		itemDef
+		{
+			name				saberstyle_staff
+			background			"gfx/elegance_hud/saber_staff"
+			forecolor			1 1 1 1
+			rect				-122 80 110 6				// (these positions are relative to the initial position of the menu)
+												// X pos, Y pos, char size, char height
+		}
+
 		// Tells current score of game
 		itemDef 
 		{

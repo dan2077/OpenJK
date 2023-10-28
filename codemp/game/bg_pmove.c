@@ -66,21 +66,52 @@ qboolean gPMDoSlowFall = qfalse;
 qboolean pm_cancelOutZoom = qfalse;
 
 // movement parameters
-float	pm_stopspeed = 100.0f;
-float	pm_duckScale = 0.50f;
-float	pm_swimScale = 0.50f;
-float	pm_wadeScale = 0.70f;
+const float	pm_stopspeed = 100.0f;
+const float	pm_duckScale = 0.50f;
+const float	pm_swimScale = 0.50f;
+const float	pm_wadeScale = 0.70f;
 
-float	pm_vehicleaccelerate = 36.0f;
-float	pm_accelerate = 10.0f;
-float	pm_airaccelerate = 1.0f;
-float	pm_wateraccelerate = 4.0f;
-float	pm_flyaccelerate = 8.0f;
+const float	pm_vehicleaccelerate = 36.0f;
+const float	pm_accelerate = 10.0f;
+const float	pm_airaccelerate = 1.0f;
+const float	pm_wateraccelerate = 4.0f;
+const float	pm_flyaccelerate = 8.0f;
 
-float	pm_friction = 6.0f;
-float	pm_waterfriction = 1.0f;
-float	pm_flightfriction = 3.0f;
-float	pm_spectatorfriction = 5.0f;
+const float pm_sp_accelerate = 12.0f;
+const float pm_sp_airaccelerate = 4.0f;
+const float pm_sp_airDecelRate = 1.35f;
+
+const float	pm_friction = 6.0f;
+const float	pm_waterfriction = 1.0f;
+const float	pm_flightfriction = 3.0f;
+const float	pm_spectatorfriction = 5.0f;
+
+//japro/dfmania movement parameters
+const float pm_vq3_duckScale = 0.25f;
+
+const float	pm_cpm_accelerate = 15.0f;
+const float	pm_cpm_airaccelerate = 1.0f;
+const float	pm_cpm_airstopaccelerate = 2.5f;
+const float	pm_cpm_airstrafeaccelerate = 70.0f;
+const float	pm_cpm_airstrafewishspeed = 30.0f;
+
+const float	pm_cpm_aircontrol = 150.0f;
+const float pm_cpm_friction = 8.0f;
+
+const float pm_wsw_accelerate = 12.0f;
+const float pm_wsw_duckScale = 0.3125f;
+
+const float pm_slick_accelerate = 30.0f;
+const float	pm_slick_airstrafeaccelerate = 100.0f;
+const float	pm_slick_friction = 0.0f;
+const float	pm_jetpack_airaccelerate = 1.4f;
+
+
+
+const float pm_qw_airaccelerate = 0.7f;
+const float pm_qw_friction = 4.0f;
+
+//japro/dfmania movement parameters
 
 int		c_pmove = 0;
 
@@ -13098,6 +13129,104 @@ void PmoveSingle (pmove_t *pmove) {
 		}
 		noAnimate = qtrue;
 	}
+
+
+#if _CGAME
+    if (pm->ps->stats[STAT_RACEMODE] && pm->ps->pm_type == PM_NORMAL && pm->cmd.buttons & BUTTON_STRAFEBOT && !(cgs.restricts & RESTRICT_SB)) {
+#else
+        if (pm->ps->stats[STAT_RACEMODE] && pm->ps->pm_type == PM_NORMAL && pm->cmd.buttons & BUTTON_STRAFEBOT) {
+#endif
+        const int moveStyle = PM_GetMovePhysics();
+#if _CGAME
+        if (pm->ps->clientNum >= 0 && pm->ps->clientNum < MAX_CLIENTS && (moveStyle == MV_BOTCPM /*|| (g_entities[pm->ps->clientNum].client && g_entities[pm->ps->clientNum].client->pers.practice)*/))
+#else
+            if (pm->ps->clientNum >= 0 && pm->ps->clientNum < MAX_CLIENTS && (moveStyle == MV_BOTCPM || (g_entities[pm->ps->clientNum].client && g_entities[pm->ps->clientNum].client->pers.practice)))
+#endif
+        {
+            const float realCurrentSpeed = sqrt((pm->ps->velocity[0] * pm->ps->velocity[0]) + (pm->ps->velocity[1] * pm->ps->velocity[1]));
+            if (realCurrentSpeed > 0) {
+                vec3_t vel = { 0 }, velangle;
+                float optimalDeltaAngle = 0;
+                qboolean CJ = qtrue;
+                if (pm->ps->groundEntityNum != ENTITYNUM_WORLD || pm->cmd.upmove > 0)
+                    CJ = qfalse;
+                else if (moveStyle == MV_SLICK)
+                    CJ = qfalse;
+                else if (pml.walking && pml.groundTrace.surfaceFlags & SURF_SLICK) { //Lmao fuck this bullshit. no way to tell if we are on slick i guess.
+                    CJ = qfalse;
+                }
+                else if (realCurrentSpeed > pm->ps->basespeed * 1.5f) //idk this is retarded, but lets us groundframe
+                    CJ = qfalse;
+
+                if (realCurrentSpeed > pm->ps->basespeed || (CJ && (realCurrentSpeed > (pm->ps->basespeed * 0.5f)))) {
+                    float middleOffset = 0; //Idk
+#if _GAME
+                    middleOffset = bot_strafeOffset.integer;
+#endif
+                    if (CJ)
+                        if (moveStyle == MV_CPM || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM)
+                            optimalDeltaAngle = -1; //CJ //Take into account ground accel/friction.. only cpm styles turn faster?
+                        else
+                            optimalDeltaAngle = -6;
+                    else {
+                        float realAccel = 1.0f;
+                        if (moveStyle == MV_SP)
+                            realAccel = 4.0f;
+                        else if (moveStyle == MV_SLICK)
+                            realAccel = 30.0f;
+                        //jetpack. 1.4f ?
+                        optimalDeltaAngle = (acos((double)((pm->ps->basespeed - (realAccel * pm->ps->basespeed * pml.frametime)) / realCurrentSpeed)) * (180.0f / M_PI) - 45.0f);
+                        if (optimalDeltaAngle < 0 || optimalDeltaAngle > 360)
+                            optimalDeltaAngle = 0;
+                    }
+
+                    vel[0] = pm->ps->velocity[0];
+                    vel[1] = pm->ps->velocity[1];
+                    vectoangles(vel, velangle);
+
+                    if (pm->cmd.forwardmove > 0 && pm->cmd.rightmove > 0) {//WD
+                        optimalDeltaAngle = 0 - optimalDeltaAngle;
+                    }
+                    else if (pm->cmd.forwardmove > 0 && pm->cmd.rightmove < 0) {//WA
+                        optimalDeltaAngle = 0 + optimalDeltaAngle;
+                    }
+                    else if (!pm->cmd.forwardmove && pm->cmd.rightmove > 0) {//D
+                        if (moveStyle == MV_QW || moveStyle == MV_CPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM)
+                            optimalDeltaAngle = 0 - middleOffset; //Take into account speed.
+                        else
+                            optimalDeltaAngle = 45 - optimalDeltaAngle;
+                    }
+                    else if (!pm->cmd.forwardmove && pm->cmd.rightmove < 0) {//A
+                        if (moveStyle == MV_QW || moveStyle == MV_CPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM)
+                            optimalDeltaAngle = 0 + middleOffset;
+                        else
+                            optimalDeltaAngle = -45 + optimalDeltaAngle;
+                    }
+                    else if (pm->cmd.forwardmove > 0 && !pm->cmd.rightmove) {//W
+                        if (AngleSubtract(velangle[YAW], pm->ps->viewangles[YAW]) > 0) { //Decide which W we want.  (Whatever is closest)
+                            if (moveStyle == MV_QW || moveStyle == MV_CPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM) //Why the f does it switch
+                                optimalDeltaAngle = -45; //Needs good offset
+                            else
+                                optimalDeltaAngle = -45 - optimalDeltaAngle;
+                        }
+                        else { //Right side
+                            if (moveStyle == MV_QW || moveStyle == MV_CPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM)
+                                optimalDeltaAngle = 45; //Needs good offset
+                            else
+                                optimalDeltaAngle = 45 + optimalDeltaAngle;
+                        }
+                    }
+
+                    velangle[YAW] += optimalDeltaAngle;
+                    velangle[PITCH] = pm->ps->viewangles[PITCH];
+
+                    PM_SetPMViewAngle(pm->ps, velangle, &pm->cmd);
+                    AngleVectors(pm->ps->viewangles, pml.forward, pml.right, pml.up); //Have to re set this here
+                }
+            }
+        }
+    }
+
 	if (pm_entSelf->s.NPC_class!=CLASS_VEHICLE
 		&&pm->ps->m_iVehicleNum)
 	{//don't even run physics on a player if he's on a vehicle - he goes where the vehicle goes

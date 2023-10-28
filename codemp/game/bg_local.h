@@ -59,19 +59,10 @@ typedef struct
 extern	pml_t		pml;
 
 // movement parameters
-extern	float	pm_stopspeed;
-extern	float	pm_duckScale;
-extern	float	pm_swimScale;
-extern	float	pm_wadeScale;
-
-extern	float	pm_accelerate;
-extern	float	pm_airaccelerate;
-extern	float	pm_wateraccelerate;
-extern	float	pm_flyaccelerate;
-
-extern	float	pm_friction;
-extern	float	pm_waterfriction;
-extern	float	pm_flightfriction;
+// movement parameters
+extern  float   forceSpeedLevels[];
+extern  float   forceJumpHeight[];
+extern  float   forceJumpStrength[];
 
 extern	int		c_pmove;
 

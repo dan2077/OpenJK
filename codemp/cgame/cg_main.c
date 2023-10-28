@@ -1459,6 +1459,7 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.JK2HUDSaberStyle2 = trap->R_RegisterShader("gfx/hud/saber_stylesMed");
 	cgs.media.JK2HUDSaberStyle3 = trap->R_RegisterShader("gfx/hud/saber_stylesStrong");
 	cgs.media.JK2HUDSaberStyle4 = trap->R_RegisterShader("gfx/hud/saber_stylesStaff");
+    cgs.media.JK2HUDSaberStyle5 = trap->R_RegisterShader("gfx/hud/saber_stylesDual");
 
 	cgs.media.JK2HUDRightFrame = trap->R_RegisterShaderNoMip("gfx/hud/jk2hudrightframe");
 	cgs.media.JK2HUDInnerRight = trap->R_RegisterShaderNoMip("gfx/hud/jk2hudright_innerframe");

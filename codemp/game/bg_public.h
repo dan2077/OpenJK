@@ -1925,3 +1925,46 @@ extern int forcePowerDarkLight[NUM_FORCE_POWERS];
 extern const char *gametypeStringShort[GT_MAX_GAME_TYPE];
 const char *BG_GetGametypeString( int gametype );
 int BG_GetGametypeForString( const char *gametype );
+
+extern	const	float	pm_stopspeed;
+extern	const	float	pm_duckScale;
+extern	const	float	pm_swimScale;
+extern	const	float	pm_wadeScale;
+
+extern	const	float	pm_accelerate;
+extern	const	float	pm_airaccelerate;
+extern	const	float	pm_wateraccelerate;
+extern	const	float	pm_flyaccelerate;
+
+extern  const   float	pm_spectatorfriction;
+extern	const	float	pm_friction;
+extern	const	float	pm_waterfriction;
+extern	const	float	pm_flightfriction;
+
+//japro/dfmania movement parameters start
+
+extern  const   float   pm_sp_accelerate;
+extern  const   float   pm_sp_airaccelerate;
+extern  const   float   pm_sp_airDecelRate;
+
+extern	const	float	pm_vq3_duckScale;
+
+extern	const	float	pm_cpm_accelerate;
+extern	const	float	pm_cpm_airaccelerate;
+extern	const	float	pm_cpm_airstopaccelerate;
+extern	const	float	pm_cpm_airstrafeaccelerate;
+extern	const	float	pm_cpm_airstrafewishspeed;
+extern	const	float	pm_cpm_aircontrol;
+extern	const	float	pm_cpm_friction;
+
+extern	const	float	pm_wsw_accelerate;
+extern	const	float	pm_wsw_duckScale;
+
+extern	const	float	pm_slick_accelerate;
+extern	const	float	pm_slick_airstrafeaccelerate;
+extern  const   float 	pm_slick_friction;
+
+extern	const	float	pm_qw_airaccelerate;
+extern	const	float	pm_qw_friction;
+
+extern	const	float	pm_jetpack_airaccelerate;

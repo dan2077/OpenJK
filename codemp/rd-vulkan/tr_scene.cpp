@@ -622,6 +622,8 @@ void RE_RenderScene( const refdef_t *fd ) {
 	parms.num_dlights = tr.refdef.num_dlights;
 #endif
 
+	parms.zNear = r_znear->value;
+
 	parms.fovX = tr.refdef.fov_x;
 	parms.fovY = tr.refdef.fov_y;
 

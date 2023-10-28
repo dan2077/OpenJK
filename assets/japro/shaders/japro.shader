@@ -339,6 +339,19 @@ gfx/hud/saber_stylesstrong
 	}
 }
 
+gfx/hud/saber_stylesdual
+{
+	nopicmip
+	nomipmaps
+	notc
+	cull disable
+	{
+		map gfx/hud/saber_stylesdual
+		blendFunc GL_ONE GL_ONE
+		rgbGen vertex
+	}
+}
+
 gfx/hud/saber_stylesstaff
 {
 	nopicmip

@@ -212,10 +212,16 @@ void vk_create_shader_modules( void )
     VK_SET_OBJECT_NAME(vk.shaders.frag.light[1][0], "linear light fragment module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
     VK_SET_OBJECT_NAME(vk.shaders.frag.light[1][1], "linear light fog fragment module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
 
+    vk.shaders.refraction_fs = SHADER_MODULE(refraction_frag_spv);
+    vk.shaders.refraction_vs = SHADER_MODULE(refraction_vert_spv);
+    VK_SET_OBJECT_NAME(vk.shaders.refraction_fs, "refraction vertex module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
+    VK_SET_OBJECT_NAME(vk.shaders.refraction_vs, "refraction fragment module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
+
     vk.shaders.color_fs = SHADER_MODULE(color_frag_spv);
     vk.shaders.color_vs = SHADER_MODULE(color_vert_spv);
-    VK_SET_OBJECT_NAME(vk.shaders.color_vs, "single-color vertex module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
-    VK_SET_OBJECT_NAME(vk.shaders.color_fs, "single-color fragment module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
+    VK_SET_OBJECT_NAME(vk.shaders.color_vs, "refraction vertex module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
+    VK_SET_OBJECT_NAME(vk.shaders.color_fs, "refraction fragment module", VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT);
+
 
     vk.shaders.fog_vs = SHADER_MODULE(fog_vert_spv);
     vk.shaders.fog_fs = SHADER_MODULE(fog_frag_spv);
@@ -309,6 +315,9 @@ void vk_destroy_shader_modules( void )
 
     qvkDestroyShaderModule(vk.device, vk.shaders.color_fs, NULL);
     qvkDestroyShaderModule(vk.device, vk.shaders.color_vs, NULL);
+
+    qvkDestroyShaderModule(vk.device, vk.shaders.refraction_fs, NULL);
+    qvkDestroyShaderModule(vk.device, vk.shaders.refraction_vs, NULL);
 
     qvkDestroyShaderModule(vk.device, vk.shaders.fog_vs, NULL);
     qvkDestroyShaderModule(vk.device, vk.shaders.fog_fs, NULL);

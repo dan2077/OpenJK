@@ -459,8 +459,12 @@ void vk_initialize( void )
 		vk.bloomActive = qtrue;
 
 	// Dynamic glow
-	if( vk.fboActive && glConfig.maxActiveTextures >= 4 && r_DynamicGlow->integer )
+	if ( vk.fboActive && glConfig.maxActiveTextures >= 4 && r_DynamicGlow->integer )
 		vk.dglowActive = qtrue;
+
+	// Refraction
+	if ( vk.fboActive && glConfig.maxActiveTextures >= 4 )
+		vk.refractionActive = qtrue;
 
 	// Screenmap
 	vk.screenMapSamples = MIN(vkMaxSamples, VK_SAMPLE_COUNT_4_BIT);

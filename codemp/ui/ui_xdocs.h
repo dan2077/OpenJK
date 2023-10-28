@@ -46,8 +46,9 @@ XDOCS_CVAR_DEF("cg_hudFiles", "HUD style",
 XDOCS_CVAR_DEF("cg_movementKeys", "Show the movement keys onscreen",
 	SETTING("0", "Movement keys are hidden") NL
 	SETTING("1", "Movement keys are shown") NL
-    SETTING("2", "Crosshair style") NL
-    SETTING("3", "Moveable crosshair style")
+    SETTING("2", "Movement keys are shown with attack/altattack inputs") NL
+    SETTING("3", "Crosshair style") NL
+    SETTING("4", "Moveable crosshair style")
 )
 
 XDOCS_CVAR_DEF("cg_movementKeysX", "Horizontal location of the movement keys",""
