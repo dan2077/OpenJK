@@ -3984,7 +3984,7 @@ Q_EXPORT intptr_t vmMain( int command, intptr_t arg0, intptr_t arg1, intptr_t ar
 CG_UpdateWidescreen
 ===================
 */
-static void CG_UpdateWidescreen(void) {
+void CG_UpdateWidescreen(void) {
     if (cg_widescreen.integer) {
         if ( cgs.glconfig.vidWidth >= cgs.glconfig.vidHeight ) {
             cgs.screenWidth = (float)SCREEN_HEIGHT * cgs.glconfig.vidWidth / cgs.glconfig.vidHeight;

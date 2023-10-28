@@ -472,7 +472,7 @@ int UI_ParseAnimationFile(const char *filename, animation_t *animset, qboolean i
 UI_UpdateWidescreen
 =================
 */
-static void UI_UpdateWidescreen(void) {
+void UI_UpdateWidescreen(void) {
     float		vidWidth = uiInfo.uiDC.glconfig.vidWidth;
     float		vidHeight = uiInfo.uiDC.glconfig.vidHeight;
     qboolean	portrait;
