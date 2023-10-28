@@ -1032,7 +1032,7 @@
 			font 				4
 			textscale 			1
 			forecolor			.615 .615 .956 1
-			cvarStrList			{  "Vanilla" , "rd-vanilla" , "Vulkan", "rd-vulkan", "Rend2" , "rd-rend2" }
+			cvarStrList			{  "Vanilla" , "rd-eternaljk" , "Vulkan", "rd-vulkan", "Rend2" , "rd-rend2e" }
 			descText			"Change the renderer library to use."
 			cvar				"cl_renderer"
 			visible				1
@@ -1427,7 +1427,7 @@
 			visible				0
 			descText			"Advanced video settings"
 			cvarTest			"cl_renderer"
-			hideCvar			{ "rd-vanilla" }
+			hideCvar			{ "rd-eternaljk" , "rd-vulkan" }
 
 			action
 			{
@@ -1464,7 +1464,7 @@
 			visible				0
 			descText			"Advanced video settings"
 			cvarTest			"cl_renderer"
-			hideCvar			{ "rd-vanilla" }
+			hideCvar			{ "rd-eternaljk , rd-vulkan" }
 
 			action
 			{

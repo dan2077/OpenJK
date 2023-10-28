@@ -39,8 +39,8 @@ XCVAR_DEF( cl_currentServerAddress,	"0",	NULL,					CVAR_ROM )
 
 //JAPRO HUD / DISPLAY
 XCVAR_DEF( cg_movementKeys,			"0",	NULL,					CVAR_ARCHIVE )
-XCVAR_DEF( cg_movementKeysX,		"465",	NULL,					CVAR_ARCHIVE )
-XCVAR_DEF( cg_movementKeysY,		"432",	NULL,					CVAR_ARCHIVE )
+XCVAR_DEF( cg_movementKeysX,		"0",	NULL,					CVAR_ARCHIVE )
+XCVAR_DEF( cg_movementKeysY,		"0",	NULL,					CVAR_ARCHIVE )
 XCVAR_DEF( cg_movementKeysSize,		"1.0",	NULL,					CVAR_ARCHIVE )
 XCVAR_DEF( cg_speedometer,			"0",	NULL,					CVAR_ARCHIVE ) //bitvalue
 XCVAR_DEF( cg_speedometerX,			"132",	NULL,					CVAR_ARCHIVE )

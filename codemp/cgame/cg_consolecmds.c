@@ -1075,7 +1075,7 @@ static bitInfo_T strafeTweaks[] = {
     {"SA"},//16
     {"SD"},//17
     {"Small Lines"},//18
-    {"Invert"},//19
+    {"Max"},//19
     {"Accel Zones"} //20
 };
 static const int MAX_STRAFEHELPER_TWEAKS = ARRAY_LEN( strafeTweaks );
@@ -1246,8 +1246,11 @@ void CG_PluginDisable_f( void ) {
 	}
 
 	if ( trap->Cmd_Argc() == 1 ) {
-		int i = 0, display = 0;
-
+		int i = 0;
+        dynTable_init();
+        dynTable_addHeader("num", ALIGN_LEFT);
+        dynTable_addHeader("Enabled", ALIGN_CENTER);
+        dynTable_addHeader("Name", ALIGN_LEFT);
 		for ( i = 0; i < MAX_PLUGINDISABLES; i++ ) {
 
 			if (cgs.serverMod == SVMOD_JAPLUS && !japlusPluginDisables[i])
@@ -1255,15 +1258,11 @@ void CG_PluginDisable_f( void ) {
 			if (cgs.serverMod == SVMOD_JAPRO && !japroPluginDisables[i])
 				continue;
 
-			if ( (cp_pluginDisable.integer & (1 << i)) ) {
-				Com_Printf( "%2d [X] %s\n", display, pluginDisables[i].string );
-			}
-			else {
-				Com_Printf( "%2d [ ] %s\n", display, pluginDisables[i].string );
-			}
-			display++;
-		}
-		return;
+            dynTable_addCell(va("%d", i));
+            dynTable_addCell(va("%c", cp_pluginDisable.integer & (1 << i) ? 'X' : ' '));
+            dynTable_addCell(va("%s", pluginDisables[i].string));
+        }
+        dynTable_print();
 	}
 	else {
 		char arg[8] = { 0 };
@@ -1379,8 +1378,11 @@ static const int MAX_PLAYERSTYLES = ARRAY_LEN(playerStyles);
 void CG_StylePlayer_f(void)
 {
 	if (trap->Cmd_Argc() == 1) {
-		int i = 0, display = 0;
-
+		int i = 0;
+        dynTable_init();
+        dynTable_addHeader("num", ALIGN_LEFT);
+        dynTable_addHeader("Enabled", ALIGN_CENTER);
+        dynTable_addHeader("Name", ALIGN_LEFT);
 		for (i = 0; i < MAX_PLAYERSTYLES; i++) {
 
 			if (cgs.serverMod == SVMOD_JAPLUS && !japlusPlayerStyles[i])
@@ -1388,15 +1390,12 @@ void CG_StylePlayer_f(void)
 			if (cgs.serverMod == SVMOD_JAPRO && !japroPlayerStyles[i])
 				continue;
 
-			if ((cg_stylePlayer.integer & (1 << i))) {
-				Com_Printf("%2d [X] %s\n", display, playerStyles[i].string);
-			}
-			else {
-				Com_Printf("%2d [ ] %s\n", display, playerStyles[i].string);
-			}
-			display++;
+            dynTable_addCell(va("%d", i));
+            dynTable_addCell(va("%c", cg_stylePlayer.integer & (1 << i) ? 'X' : ' '));
+            dynTable_addCell(va("%s", playerStyles[i].string));
 		}
-		return;
+        dynTable_print();
+        return;
 	}
 	else {
 		char arg[8] = { 0 };
@@ -1472,17 +1471,19 @@ static const int MAX_SPEEDOMETER_SETTINGS = ARRAY_LEN(speedometerSettings);
 void CG_SpeedometerSettings_f(void)
 {
 	if (trap->Cmd_Argc() == 1) {
-		int i = 0, display = 0;
+		int i = 0;
+
+        dynTable_init();
+        dynTable_addHeader("num", ALIGN_LEFT);
+        dynTable_addHeader("Enabled", ALIGN_CENTER);
+        dynTable_addHeader("Name", ALIGN_LEFT);
 
 		for (i = 0; i < MAX_SPEEDOMETER_SETTINGS; i++) {
-			if (cg_speedometer.integer & (1 << i)) {
-				Com_Printf("%2d [X] %s\n", display, speedometerSettings[i].string);
-			}
-			else {
-				Com_Printf("%2d [ ] %s\n", display, speedometerSettings[i].string);
-			}
-			display++;
+            dynTable_addCell(va("%d", i));
+            dynTable_addCell(va("%c", cg_speedometer.integer & (1 << i) ? 'X' : ' '));
+            dynTable_addCell(va("%s", speedometerSettings[i].string));
 		}
+        dynTable_print();
 		return;
 	}
 	else {
@@ -1707,7 +1708,7 @@ static void CG_Cosmetics(void)
 			int i;
 			int totalCosmetics;
 			cosmeticItem_t *cosItems;
-			const char *ciCosItem;
+			cosmeticItem_t *ciCosItem;
 			const char *cvar;
 
 			trap->Cmd_Argv(1, arg, sizeof(arg));
@@ -1765,7 +1766,7 @@ static void CG_Cosmetics(void)
 				{
 					dynTable_addCell(va("%i", i));
 					dynTable_addCell(cosItems[i].name);
-					if (!Q_stricmp(cosItems[i].name, ciCosItem))
+					if (!Q_stricmp(cosItems[i].name, ciCosItem->name))
 					{
 						dynTable_addCell("X");
 					}

@@ -346,6 +346,22 @@ void myGlMultMatrix( const float *a, const float *b, float *out ) {
 	}
 }
 
+void Matrix16Identity( mat4_t out )
+{
+	out[ 0] = 1.0f; out[ 4] = 0.0f; out[ 8] = 0.0f; out[12] = 0.0f;
+	out[ 1] = 0.0f; out[ 5] = 1.0f; out[ 9] = 0.0f; out[13] = 0.0f;
+	out[ 2] = 0.0f; out[ 6] = 0.0f; out[10] = 1.0f; out[14] = 0.0f;
+	out[ 3] = 0.0f; out[ 7] = 0.0f; out[11] = 0.0f; out[15] = 1.0f;
+}
+
+void Matrix16Copy( const mat4_t in, mat4_t out )
+{
+	out[ 0] = in[ 0]; out[ 4] = in[ 4]; out[ 8] = in[ 8]; out[12] = in[12];
+	out[ 1] = in[ 1]; out[ 5] = in[ 5]; out[ 9] = in[ 9]; out[13] = in[13];
+	out[ 2] = in[ 2]; out[ 6] = in[ 6]; out[10] = in[10]; out[14] = in[14];
+	out[ 3] = in[ 3]; out[ 7] = in[ 7]; out[11] = in[11]; out[15] = in[15];
+}
+
 /*
 =================
 R_RotateForEntity
@@ -361,7 +377,7 @@ void R_RotateForEntity( const trRefEntity_t *ent, const viewParms_t *viewParms,
 	vec3_t	delta;
 	float	axisLength;
 
-	if (ent->e.reType != RT_MODEL) {
+	if ( ent->e.reType != RT_MODEL || ent == &tr.worldEntity ) {
 		*ori = viewParms->world;
 		return;
 	}
@@ -603,7 +619,7 @@ R_SetupProjectionZ
 */
 static void R_SetupProjectionZ( viewParms_t *dest ) {
 
-	const float zNear = r_znear->value;
+	const float zNear = dest->zNear;
 	const float zFar = dest->zFar;
 	const float depth = zFar - zNear;
 

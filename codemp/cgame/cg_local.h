@@ -1797,7 +1797,8 @@ typedef struct cgMedia_s {
 	qhandle_t	JK2HUDSaberStyle2;
 	qhandle_t	JK2HUDSaberStyle3;
 	qhandle_t	JK2HUDSaberStyle4;
-	qhandle_t	JK2HUDRightFrame;
+    qhandle_t	JK2HUDSaberStyle5;
+    qhandle_t	JK2HUDRightFrame;
 	qhandle_t	JK2HUDInnerRight;
 	qhandle_t	JK2weaponProngsOn;
 	qhandle_t	JK2weaponProngsOff;
@@ -2706,7 +2707,8 @@ void CG_InitSiegeMode(void);
 void CG_SiegeRoundOver(centity_t *ent, int won);
 void CG_SiegeObjectiveCompleted(centity_t *ent, int won, int objectivenum);
 
-
+qboolean CG_WorldCoordToScreenCoord(vec3_t worldCoord, float *x, float *y);
+qboolean CG_InRollAnim( centity_t *cent );
 
 //===============================================
 

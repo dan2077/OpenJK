@@ -401,8 +401,8 @@
 
 #### JAPROHUD/DISPLAY 
 	cg_movementKeys			0	
-	cg_movementKeysX		451	
-	cg_movementKeysY		430	
+	cg_movementKeysX		0	
+	cg_movementKeysY		0	
 	cg_movementKeysSize		1	
 	cg_speedometer			0	
 	cg_speedometerX			132	

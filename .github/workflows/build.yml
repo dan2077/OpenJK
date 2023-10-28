@@ -7,24 +7,19 @@ on:
       - master
       - beta
     paths-ignore:
-      - '**.md'
-      - '*.txt'
-      - '.gitignore'
-      - 'docs/*'
+      - "**.md"
+      - ".gitignore"
+      - "docs/*"
   pull_request:
     branches:
       - master
       - beta
     paths-ignore:
-      - '**.md'
-      - '*.txt'
-      - '.gitignore'
-      - 'docs/*'
+      - "**.md"
+      - ".gitignore"
+      - "docs/*"
   release:
     types: [published]
-
-env:
-  newline: \\n
 
 jobs:
   msvc:
@@ -35,6 +30,9 @@ jobs:
         arch: [x86, x86_64]
         build_type: [Debug, Release]
         portable: [Portable, Non-Portable]
+        exclude:
+          - build_type: Debug
+            portable: Portable
         include:
           - arch: x86
             platform: Win32
@@ -48,37 +46,28 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
 
       - name: Create Build Environment
-        run: cmake -E make_directory ${{ runner.workspace }}/build
+        run: cmake -E make_directory ${{ github.workspace }}/build
 
       - name: Configure CMake
         shell: bash
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         run: |
+          OPTIONS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_INSTALL_PREFIX=bin"
           if [ "${{ matrix.portable }}" == "Portable" ]; then
-            OPTIONS="-DCMAKE_BUILD_TYPE=${{ runner.build_type }} -DBuildPortableVersion=ON -DCMAKE_INSTALL_PREFIX=bin"
+            OPTIONS+=" -DBuildPortableVersion=ON"
           else
-            OPTIONS="-DCMAKE_BUILD_TYPE=${{ runner.build_type }} -DBuildPortableVersion=OFF -DCMAKE_INSTALL_PREFIX=bin"
+            OPTIONS+=" -DBuildPortableVersion=OFF"
           fi
           cmake $GITHUB_WORKSPACE -A ${{ matrix.platform }} $OPTIONS
 
-      - name: Get SHORT_SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Update Version Hash
-        working-directory: ${{ runner.workspace }}/TaystJK/codemp/cgame
-        shell: bash
-        run: |
-          sed -i 's/Your client version of the mod was/Your build revision is ${{ steps.vars.outputs.sha_short }} ${{ env.newline }}Your client version of the mod was/' cg_consolecmds.c
-
       - name: Build
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: cmake --build . --config ${{ matrix.build_type }}
+        run: cmake --build . --config ${{ matrix.build_type }} -j $NUMBER_OF_PROCESSORS
 
       - name: Install
         if: ${{ matrix.build_type == 'Release' }}
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
         run: cmake --install . --config ${{ matrix.build_type }}
 
@@ -86,7 +75,7 @@ jobs:
         if: ${{ matrix.build_type == 'Release' }}
         with:
           name: TaystJK-windows-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}
-          path: ${{ runner.workspace }}/build/bin
+          path: ${{ github.workspace }}/build/bin/JediAcademy
           if-no-files-found: error
 
   ubuntu:
@@ -115,62 +104,44 @@ jobs:
             sudo apt-get -qq update
             sudo apt-get install libjpeg-dev libpng-dev zlib1g-dev libsdl2-dev
           fi
-          cmake -E make_directory ${{ runner.workspace }}/build
+          cmake -E make_directory ${{ github.workspace }}/build
 
       - name: Configure CMake
         shell: bash
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         run: |
+          OPTIONS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install"
           if [ "${{ matrix.portable }}" == "Portable" ]; then
-            OPTIONS="-DUseInternalLibs=ON -DBuildPortableVersion=ON -DBuildDiscordRichPresence=OFF -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/install"
+            OPTIONS+=" -DUseInternalLibs=ON -DBuildPortableVersion=ON"
           else
-            OPTIONS="-DUseInternalLibs=OFF -DBuildPortableVersion=OFF -DBuildDiscordRichPresence=OFF -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/install"
+            OPTIONS+=" -DUseInternalLibs=OFF -DBuildPortableVersion=OFF"
           fi
-          
           if [ ${{ matrix.arch }} == "x86" ]; then
-          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} $OPTIONS -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/linux-i686.cmake
-          else
-          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} $OPTIONS
+            OPTIONS+=" -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/linux-i686.cmake"
           fi
-
-      - name: Get SHORT_SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Update Version Hash
-        working-directory: ${{ runner.workspace }}/TaystJK/codemp/cgame
-        shell: bash
-        run: |
-          sed -i 's/Your client version of the mod was/Your build revision is ${{ steps.vars.outputs.sha_short }} ${{ env.newline }}Your client version of the mod was/' cg_consolecmds.c
-
+          cmake $GITHUB_WORKSPACE $OPTIONS
       - name: Build
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: cmake --build .
+        run: cmake --build . -j $(nproc)
 
       - name: Install
         if: ${{ matrix.build_type == 'Release' }}
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
         run: cmake --install .
 
       - name: Create binary archive
         if: ${{ matrix.build_type == 'Release' }}
-        working-directory: ${{ runner.workspace }}/install/JediAcademy
+        working-directory: ${{ github.workspace }}/install/JediAcademy
         shell: bash
-        run: |
-          if [ ${{ matrix.arch }} == "x86" ]; then
-          chmod +x eternaljk.i386
-          else
-          chmod +x eternaljk.${{ matrix.arch }}  
-          fi
-          tar -czvf TaystJK-linux-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz      *
+        run: tar -czvf TaystJK-linux-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz  *
 
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.build_type == 'Release' }}
         with:
           name: TaystJK-linux-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}
-          path: ${{runner.workspace}}/install/JediAcademy/TaystJK-linux-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz
+          path: ${{github.workspace}}/install/JediAcademy/TaystJK-linux-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz
           if-no-files-found: error
 
   macos:
@@ -189,54 +160,44 @@ jobs:
       - name: Create Build Environment
         run: |
           brew install zlib libjpeg libpng sdl2
-          cmake -E make_directory ${{ runner.workspace }}/build
+          cmake -E make_directory ${{ github.workspace }}/build
 
       - name: Configure CMake
         shell: bash
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         run: |
+          OPTIONS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install"
           if [ "${{ matrix.portable }}" == "Portable" ]; then
-            OPTIONS="-DCMAKE_BUILD_TYPE=${{ runner.build_type }} -DUseInternalLibs=ON -DBuildPortableVersion=ON -DBuildDiscordRichPresence=OFF -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/install"
+            OPTIONS+=" -DUseInternalLibs=ON -DBuildPortableVersion=ON"
           else
-            OPTIONS="-DCMAKE_BUILD_TYPE=${{ runner.build_type }} -DUseInternalLibs=OFF -DBuildPortableVersion=OFF -DBuildDiscordRichPresence=OFF -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/install"
+            OPTIONS+=" -DUseInternalLibs=OFF -DBuildPortableVersion=OFF"
           fi
           cmake $GITHUB_WORKSPACE $OPTIONS
 
-      - name: Get SHORT_SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Update Version Hash
-        working-directory: ${{ runner.workspace }}/TaystJK/codemp/cgame
-        shell: bash
-        run: |
-          sed -i.bak 's/Your client version of the mod was/Your build revision is ${{ steps.vars.outputs.sha_short }} ${{ env.newline }}Your client version of the mod was/' cg_consolecmds.c
-          rm cg_consolecmds.c.bak
-
       - name: Build
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: cmake --build .
+        run: cmake --build . -j $(getconf _NPROCESSORS_ONLN)
 
       - name: Install
         if: ${{ matrix.build_type == 'Release' }}
-        working-directory: ${{ runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
         run: cmake --install .
 
-      - name: Create binary archive
+      - name: Create TaystJK binary archive
         if: ${{ matrix.build_type == 'Release' }}
-        working-directory: ${{ runner.workspace }}/install/JediAcademy
+        working-directory: ${{ github.workspace }}/install/JediAcademy
         shell: bash
         run: |
           chmod +x eternaljk.x86_64.app/Contents/MacOS/eternaljk.x86_64
-          tar -czvf TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz      *
+          tar -czvf TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz *
 
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.build_type == 'Release' }}
         with:
           name: TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}
-          path: ${{ runner.workspace }}/install/JediAcademy/TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz
+          path: ${{ github.workspace }}/install/JediAcademy/TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz
           if-no-files-found: error
 
   create-latest:
@@ -253,11 +214,11 @@ jobs:
 
       - name: Create binary archives
         run: |
-          7z a -r TaystJK-windows-x86.zip         ./TaystJK-windows-x86-Release-Non-Portable/JediAcademy/* '-x!msvcp*.*' '-x!vcruntime*.*' '-x!concrt*.*'
-          7z a -r TaystJK-windows-x86_64.zip         ./TaystJK-windows-x86_64-Release-Non-Portable/JediAcademy/* '-x!msvcp*.*' '-x!vcruntime*.*' '-x!concrt*.*'
-          mv ./TaystJK-linux-x86-Release-Non-Portable/*     TaystJK-linux-x86.tar.gz
-          mv ./TaystJK-linux-x86_64-Release-Non-Portable/*  TaystJK-linux-x86_64.tar.gz
-          mv ./TaystJK-macos-x86_64-Release-Non-Portable/*  TaystJK-macos-x86_64.tar.gz
+          7z a -r TaystJK-windows-x86.zip ./TaystJK-windows-x86-Release-Non-Portable/* '-x!msvcp*.*' '-x!vcruntime*.*' '-x!concrt*.*'
+          7z a -r TaystJK-windows-x86_64.zip ./TaystJK-windows-x86_64-Release-Non-Portable/* '-x!msvcp*.*' '-x!vcruntime*.*' '-x!concrt*.*'
+          mv ./TaystJK-linux-x86-Release-Non-Portable/* TaystJK-linux-x86.tar.gz
+          mv ./TaystJK-linux-x86_64-Release-Non-Portable/* TaystJK-linux-x86_64.tar.gz
+          mv ./TaystJK-macos-x86_64-Release-Non-Portable/* TaystJK-macos-x86_64.tar.gz
 
       - name: Create latest build
         uses: ModeSevenIndustrialSolutions/action-automatic-releases@latest
@@ -309,11 +270,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - artifact_dir: TaystJK-windows-x86-Release-Non-Portable/JediAcademy
+          - artifact_dir: TaystJK-windows-x86-Release-Non-Portable/JediAcademy/
             artifact_name: TaystJK-windows-x86.zip
             zip: true
 
-          - artifact_dir: TaystJK-windows-x86_64-Release-Non-Portable/JediAcademy
+          - artifact_dir: TaystJK-windows-x86_64-Release-Non-Portable/JediAcademy/
             artifact_name: TaystJK-windows-x86_64.zip
             zip: true
 

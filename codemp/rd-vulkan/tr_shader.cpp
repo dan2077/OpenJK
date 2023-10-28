@@ -3775,14 +3775,10 @@ shader_t *FinishShader( void )
 {
 	qboolean		hasLightmapStage;
 	int				stage, i, n, m, lmStage, numStyles;
-	qboolean		colorBlend;
-	qboolean		depthMask;
 	qboolean		fogCollapse;
 	shaderStage_t	*lastStage[NUM_TEXTURE_BUNDLES];
 
 	hasLightmapStage = qfalse;
-	colorBlend = qfalse;
-	depthMask = qfalse;
 	fogCollapse = qfalse;
 
 	//
@@ -3936,12 +3932,8 @@ shader_t *FinishShader( void )
 		//  vertexLightmap = qtrue;
 		//}
 
-		if (pStage->stateBits & GLS_DEPTHMASK_TRUE) {
-			depthMask = qtrue;
-		}
-
 		//
-		// determine fog color adjustment
+		// determine sort order and fog color adjustment
 		//
 		if ((pStage->stateBits & (GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS)) &&
 			(stages[0].stateBits & (GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS))) {
@@ -3973,7 +3965,23 @@ shader_t *FinishShader( void )
 				// we can't adjust this one correctly, so it won't be exactly correct in fog
 			}
 
-			colorBlend = qtrue;
+			// don't screw with sort order if this is a portal or environment
+			if ( !shader.sort ) {
+				// see through item, like a grill or grate
+				if ( pStage->stateBits & GLS_DEPTHMASK_TRUE ) {
+					shader.sort = SS_SEE_THROUGH;
+				} else {
+					if (( blendSrcBits == GLS_SRCBLEND_ONE ) && ( blendDstBits == GLS_DSTBLEND_ONE ))
+					{
+						// GL_ONE GL_ONE needs to come a bit later
+						shader.sort = SS_BLEND1;
+					}
+					else
+					{
+						shader.sort = SS_BLEND0;
+					}
+				}
+			}
 		}
 
 		stage++;
@@ -3981,19 +3989,8 @@ shader_t *FinishShader( void )
 
 	// there are times when you will need to manually apply a sort to
 	// opaque alpha tested shaders that have later blend passes
-	if (shader.sort == SS_BAD) {
-		if (colorBlend) {
-			// see through item, like a grill or grate
-			if (depthMask) {
-				shader.sort = SS_SEE_THROUGH;
-			}
-			else {
-				shader.sort = SS_BLEND0;
-			}
-		}
-		else {
-			shader.sort = SS_OPAQUE;
-		}
+	if ( !shader.sort ) {
+		shader.sort = SS_OPAQUE;
 	}
 
 	// fix alphaGen flags to avoid redundant comparisons in R_ComputeColors()
@@ -4096,7 +4093,7 @@ shader_t *FinishShader( void )
 				if ( fogCollapse ) {
 					for ( i = 1; i < stage; i++ ) {
 						const uint32_t blendBits = stages[i].stateBits & GLS_BLEND_BITS;
-						if ( blendBits == (GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA) || blendBits == (GLS_SRCBLEND_ONE || GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA) ) {
+						if ( blendBits == (GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA) || blendBits == (GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA) ) {
 							if ( stages[i].bundle[0].adjustColorsForFog == ACFF_NONE ) {
 								fogCollapse = qfalse;
 								break;
@@ -4732,13 +4729,6 @@ static void CreateInternalShaders( void )
 	stages[0].stateBits = GLS_DEFAULT;
 	tr.defaultShader = FinishShader();
 
-	InitShader("<white>", lightmapsNone, stylesDefault);
-	stages[0].bundle[0].image[0] = tr.whiteImage;
-	stages[0].active = qtrue;
-	stages[0].bundle[0].rgbGen = CGEN_EXACT_VERTEX;
-	stages[0].stateBits = GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
-	tr.whiteShader = FinishShader();
-
 	// shadow shader is just a marker
 	InitShader("<stencil shadow>", lightmapsNone, stylesDefault);
 	stages[0].bundle[0].image[0] = tr.defaultImage;
@@ -4746,6 +4736,44 @@ static void CreateInternalShaders( void )
 	stages[0].stateBits = GLS_DEFAULT;
 	shader.sort = SS_BANNER;
 	tr.shadowShader = FinishShader();
+
+	// distortion shader is just a marker
+	InitShader("internal_distortion", lightmapsNone, stylesDefault);
+	stages[0].bundle[0].image[0] = tr.whiteImage;
+	stages[0].active = qtrue;
+	stages[0].stateBits = GLS_DEFAULT;
+	shader.sort = SS_BLEND0;
+
+	if ( vk.refractionActive ) 
+	{
+		shader.defaultShader = qfalse;
+		tr.distortionShader = FinishShader();
+		tr.distortionShader->useDistortion = qtrue;
+	} 
+	else 
+	{
+		// https://github.com/MBII/OpenJK/blob/8cf83b7a522bb7675074b576de929d6e149b429b/codemp/rd-vulkan/tr_shader.cpp#L4607
+		stages[0].bundle[0].rgbGen = CGEN_CONST;
+		stages[0].bundle[0].constantColor[0] = 80;
+		stages[0].bundle[0].constantColor[1] = 90;
+		stages[0].bundle[0].constantColor[2] = 100;
+		stages[0].bundle[0].alphaGen = AGEN_WAVEFORM;
+		stages[0].bundle[0].alphaWave.func = GF_SIN;
+		stages[0].bundle[0].alphaWave.base = 0.07f;
+		stages[0].bundle[0].alphaWave.amplitude = 0.03f;
+		stages[0].bundle[0].alphaWave.phase = 0;
+		stages[0].bundle[0].alphaWave.frequency = 0.33f;
+		stages[0].stateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+		shader.contentFlags = CONTENTS_TRANSLUCENT;
+		tr.distortionShader = FinishShader();
+	}
+
+	InitShader("<white>", lightmapsNone, stylesDefault);
+	stages[0].bundle[0].image[0] = tr.whiteImage;
+	stages[0].active = qtrue;
+	stages[0].bundle[0].rgbGen = CGEN_EXACT_VERTEX;
+	stages[0].stateBits = GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+	tr.whiteShader = FinishShader();
 
 	InitShader("<cinematic>", lightmapsNone, stylesDefault);
 	stages[0].bundle[0].image[0] = tr.defaultImage; // will be updated by specific cinematic images

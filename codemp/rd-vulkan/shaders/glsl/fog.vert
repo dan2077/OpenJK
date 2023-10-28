@@ -6,18 +6,18 @@ layout(push_constant) uniform Transform {
 };
 
 layout(set = 1, binding = 0) uniform UBO {
-	// VERTEX
+	// light/env/material parameters:
 	vec4 eyePos;
 	vec4 lightPos;
-	//  VERTEX-FOG
+	vec4 lightColor;
+	vec4 lightVector;
+//#ifdef USE_FOG	
+	// fog parameters:
 	vec4 fogDistanceVector;
 	vec4 fogDepthVector;
 	vec4 fogEyeT;
-	// FRAGMENT
-	vec4 lightColor;
 	vec4 fogColor;
-	// linear dynamic light
-	vec4 lightVector;
+//#endif
 };
 
 layout(location = 0) in vec3 in_position;

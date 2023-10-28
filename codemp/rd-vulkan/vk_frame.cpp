@@ -130,7 +130,7 @@ void vk_create_render_passes()
     attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     //attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachments[1].stencilLoadOp = r_stencilbits->integer ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    if ( vk.bloomActive || vk.dglowActive ) {
+    if ( vk.bloomActive || vk.dglowActive || vk.refractionActive ) {
         attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE; // keep it for post-bloom/dynamic-glow pass
         //attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[1].stencilStoreOp = r_stencilbits->integer ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -176,7 +176,9 @@ void vk_create_render_passes()
 #else
         attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 #endif
-        if ( vk.bloomActive || vk.dglowActive ) {
+
+
+        if ( vk.bloomActive || vk.dglowActive || vk.refractionActive ) {
             attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE; // keep it for post-bloom/dynamic-glow pass
         }
         else {
@@ -241,6 +243,27 @@ void vk_create_render_passes()
 
     VK_CHECK(qvkCreateRenderPass(device, &desc, NULL, &vk.render_pass.main));
     VK_SET_OBJECT_NAME(vk.render_pass.main, "render pass - main", VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT);
+    
+    // refraction
+    {
+        // color buffer
+        //attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+
+        // depth buffer
+        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        if ( vk.msaaActive ) {
+            attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+            attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        }
+
+        VK_CHECK( qvkCreateRenderPass( device, &desc, NULL, &vk.render_pass.refraction.extract ) );
+        VK_SET_OBJECT_NAME( vk.render_pass.refraction.extract, "render pass - refraction extract", VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT );        
+    }
 
     if ( vk.bloomActive || vk.dglowActive )
     {
@@ -395,7 +418,6 @@ void vk_create_render_passes()
     VK_CHECK(qvkCreateRenderPass(device, &desc, NULL, &vk.render_pass.gamma));
     VK_SET_OBJECT_NAME(vk.render_pass.gamma, "render pass - gamma", VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT);
     
-
     // screenmap
     // resolve/color buffer
     attachments[0].flags = 0;
@@ -547,6 +569,27 @@ void vk_create_framebuffers()
 
     if (vk.fboActive)
     {
+        // refraction
+        {
+            desc.renderPass = vk.render_pass.refraction.extract;
+            desc.attachmentCount = 2;
+            desc.width = glConfig.vidWidth;
+            desc.height = glConfig.vidHeight;
+
+            // set color and depth attachment
+            attachments[0] = vk.color_image_view;
+            attachments[1] = vk.depth_image_view;
+
+            if ( vk.msaaActive )
+            {
+                desc.attachmentCount = 3;
+                attachments[2] = vk.msaa_image_view;
+            }
+
+            VK_CHECK(qvkCreateFramebuffer(vk.device, &desc, NULL, &vk.framebuffers.refraction.extract));
+            VK_SET_OBJECT_NAME(vk.framebuffers.refraction.extract, "framebuffer - refraction extract", VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT);
+        }
+
         // screenmap
         desc.renderPass = vk.render_pass.screenmap;
         desc.attachmentCount = 2;
@@ -704,6 +747,11 @@ void vk_destroy_render_passes( void )
         vk.render_pass.gamma = VK_NULL_HANDLE;
     }
 
+    if ( vk.render_pass.refraction.extract != VK_NULL_HANDLE ) {
+        qvkDestroyRenderPass( vk.device, vk.render_pass.refraction.extract, NULL );
+        vk.render_pass.refraction.extract = VK_NULL_HANDLE;
+    }
+
     if ( vk.render_pass.capture != VK_NULL_HANDLE ) {
         qvkDestroyRenderPass( vk.device, vk.render_pass.capture, NULL );
         vk.render_pass.capture = VK_NULL_HANDLE;
@@ -834,7 +882,9 @@ static void vk_begin_render_pass( VkRenderPass renderPass, VkFramebuffer frameBu
                     clear_values[ (int)( vk.msaaActive ? 2 : 0 )  ].color = { { 0.75f, 0.75f, 0.75f, 1.0f } };
                 break;
             case RENDER_PASS_DGLOW:
-
+                    clear_values[ (int)( vk.msaaActive ? 2 : 0 )  ].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
+                break;
+            case RENDER_PASS_REFRACTION:
                     clear_values[ (int)( vk.msaaActive ? 2 : 0 )  ].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
                 break;
         }
@@ -951,6 +1001,105 @@ void vk_begin_dglow_extract_render_pass( void )
     vk_begin_render_pass( vk.render_pass.dglow.extract, frameBuffer, qtrue, vk.renderWidth, vk.renderHeight );
 }
 
+void vk_refraction_extract( void ) {
+    VkImage srcImage;
+	VkImage dstImage;
+	VkImageLayout srcImageLayout;
+	VkAccessFlagBits srcImageAccess;
+
+	srcImageAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	srcImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	srcImage = vk.color_image;
+	dstImage = vk.refraction_extract_image;
+
+	vk_record_image_layout_transition(vk.cmd->command_buffer, srcImage,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		srcImageAccess, srcImageLayout,
+		VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, 
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+	
+	vk_record_image_layout_transition(vk.cmd->command_buffer, dstImage,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, 
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+
+	if ( REFRACTION_EXTRACT_SCALE > 1 ) {
+		VkImageBlit region;
+
+		region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.srcSubresource.mipLevel = 0;
+		region.srcSubresource.baseArrayLayer = 0;
+		region.srcSubresource.layerCount = 1;
+		region.srcOffsets[0].x = 0;
+		region.srcOffsets[0].y = 0;
+		region.srcOffsets[0].z = 0;
+		region.srcOffsets[1].x = glConfig.vidWidth;
+		region.srcOffsets[1].y = glConfig.vidHeight;
+		region.srcOffsets[1].z = 1;
+		region.dstSubresource = region.srcSubresource;
+		region.dstOffsets[0] = { 0, 0, 0 };
+		region.dstOffsets[1] = { glConfig.vidWidth / REFRACTION_EXTRACT_SCALE, glConfig.vidHeight / REFRACTION_EXTRACT_SCALE, 1 };
+
+		qvkCmdBlitImage( vk.cmd->command_buffer, srcImage,
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+			&region, VK_FILTER_LINEAR );
+	}
+	else {
+		VkImageCopy region;
+
+		region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.srcSubresource.mipLevel = 0;
+		region.srcSubresource.baseArrayLayer = 0;
+		region.srcSubresource.layerCount = 1;
+		region.srcOffset.x = 0;
+		region.srcOffset.y = 0;
+		region.srcOffset.z = 0;
+		region.dstSubresource = region.srcSubresource;
+		region.dstOffset = region.srcOffset;
+		region.extent.width = glConfig.vidWidth;
+		region.extent.height = glConfig.vidHeight;
+		region.extent.depth = 1;
+
+		qvkCmdCopyImage(vk.cmd->command_buffer, srcImage, 
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
+			dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 
+			&region);
+	}
+
+	// restore previous layouts
+	vk_record_image_layout_transition(vk.cmd->command_buffer, dstImage,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, 
+		NULL, NULL);
+	
+	vk_record_image_layout_transition(vk.cmd->command_buffer, srcImage,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		srcImageAccess, srcImageLayout,
+		VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, 
+		NULL, NULL);
+}
+
+void vk_begin_post_refraction_extract_render_pass( void )
+{
+    VkViewport      viewport{};
+    VkRect2D        scissor_rect{};
+    VkFramebuffer frameBuffer = vk.framebuffers.refraction.extract;
+
+    vk.renderPassIndex = RENDER_PASS_REFRACTION;
+
+    vk.renderWidth = glConfig.vidWidth;
+    vk.renderHeight = glConfig.vidHeight;
+    vk.renderScaleX = vk.renderScaleY = 1.0;
+
+    vk_begin_render_pass( vk.render_pass.refraction.extract, frameBuffer, qfalse, vk.renderWidth, vk.renderHeight );
+}
 
 void vk_begin_frame( void )
 {
@@ -1022,7 +1171,6 @@ void vk_begin_frame( void )
         vk_begin_main_render_pass();
     }
 
-    vk.cmd->uniform_read_offset = 0;
     vk.cmd->vertex_buffer_offset = 0;
     Com_Memset(vk.cmd->buf_offset, 0, sizeof(vk.cmd->buf_offset));
     vk.cmd->curr_index_buffer = VK_NULL_HANDLE;
@@ -1138,7 +1286,6 @@ void vk_release_resources( void ) {
 
     // Reset geometry buffers offsets
     for (i = 0; i < NUM_COMMAND_BUFFERS; i++) {
-        vk.tess[i].uniform_read_offset = 0;
         vk.tess[i].vertex_buffer_offset = 0;
     }
 

@@ -1,17 +1,17 @@
 #============================================================================
 # Copyright (C) 2015, OpenJK contributors
-# 
+#
 # This file is part of the OpenJK source code.
-# 
+#
 # OpenJK is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #============================================================================
@@ -55,13 +55,13 @@ if(WIN32)
 	set(CPACK_NSIS_PACKAGE_NAME "OpenJK")
 	set(CPACK_NSIS_MUI_ICON "${SharedDir}/icons/icon.ico")
 	set(CPACK_NSIS_MUI_UNIICON "${SharedDir}/icons/icon.ico")
-	set(CPACK_NSIS_URL_INFO_ABOUT "http://openjk.org")
+	set(CPACK_NSIS_URL_INFO_ABOUT "https://openjk.org")
 
 	set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
 	include(InstallRequiredSystemLibraries)
 
 	if(BuildMPEngine)
-		string(REPLACE "." "\\\\" ICON "${MPDir}/win32/icon.ico")
+		string(REPLACE "/" "\\\\" ICON "${MPDir}/win32/icon.ico")
 		set(CPACK_NSIS_CREATE_ICONS_EXTRA
 			"${CPACK_NSIS_CREATE_ICONS_EXTRA}
 			CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Jedi Academy MP.lnk' \\\\

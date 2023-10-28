@@ -94,6 +94,19 @@ static float EvalWaveFormClamped( const waveForm_t *wf )
 }
 
 /*
+** RB_CalcStretchTexMatrix
+*/
+void RB_CalcStretchTexMatrix( const waveForm_t *wf, float *matrix )
+{
+	float p;
+
+	p = 1.0f / EvalWaveForm( wf );
+
+	matrix[0] = p; matrix[2] = 0; matrix[4] = 0.5f - 0.5f * p;
+	matrix[1] = 0; matrix[3] = p; matrix[5] = 0.5f - 0.5f * p;
+
+}
+/*
 ** RB_CalcStretchTexCoords
 */
 void RB_CalcStretchTexCoords( const waveForm_t *wf, float *src, float *dst )
@@ -1376,4 +1389,71 @@ void RB_CalcDisintegrateVertDeform( void )
 			}
 		}
 	}
+}
+
+/*
+** RB_CalcTurbulentFactors
+*/
+void RB_CalcTurbulentFactors( const waveForm_t *wf, float *amplitude, float *now )
+{
+	*now = wf->phase + tess.shaderTime * wf->frequency;
+	*amplitude = wf->amplitude;
+}
+
+/*
+** RB_CalcScaleTexMatrix
+*/
+void RB_CalcScaleTexMatrix( const float scale[2], float *matrix )
+{
+	matrix[0] = scale[0]; matrix[2] = 0.0f;     matrix[4] = 0.0f;
+	matrix[1] = 0.0f;     matrix[3] = scale[1]; matrix[5] = 0.0f;
+}
+
+/*
+** RB_CalcScrollTexMatrix
+*/
+void RB_CalcScrollTexMatrix( const float scrollSpeed[2], float *matrix )
+{
+	float timeScale = tess.shaderTime;
+	float adjustedScrollS, adjustedScrollT;
+
+	adjustedScrollS = scrollSpeed[0] * timeScale;
+	adjustedScrollT = scrollSpeed[1] * timeScale;
+
+	// clamp so coordinates don't continuously get larger, causing problems
+	// with hardware limits
+	adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
+	adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
+
+	matrix[0] = 1.0f; matrix[2] = 0.0f; matrix[4] = adjustedScrollS;
+	matrix[1] = 0.0f; matrix[3] = 1.0f; matrix[5] = adjustedScrollT;
+}
+
+/*
+** RB_CalcTransformTexMatrix
+*/
+void RB_CalcTransformTexMatrix( const texModInfo_t *tmi, float *matrix  )
+{
+	matrix[0] = tmi->matrix[0][0]; matrix[2] = tmi->matrix[1][0]; matrix[4] = tmi->translate[0];
+	matrix[1] = tmi->matrix[0][1]; matrix[3] = tmi->matrix[1][1]; matrix[5] = tmi->translate[1];
+}
+
+/*
+** RB_CalcRotateTexMatrix
+*/
+void RB_CalcRotateTexMatrix( float degsPerSecond, float *matrix )
+{
+	float timeScale = tess.shaderTime;
+	float degs;
+	int index;
+	float sinValue, cosValue;
+
+	degs = -degsPerSecond * timeScale;
+	index = degs * ( FUNCTABLE_SIZE / 360.0f );
+
+	sinValue = tr.sinTable[ index & FUNCTABLE_MASK ];
+	cosValue = tr.sinTable[ ( index + FUNCTABLE_SIZE / 4 ) & FUNCTABLE_MASK ];
+
+	matrix[0] = cosValue; matrix[2] = -sinValue; matrix[4] = 0.5 - 0.5 * cosValue + 0.5 * sinValue;
+	matrix[1] = sinValue; matrix[3] = cosValue;  matrix[5] = 0.5 - 0.5 * sinValue - 0.5 * cosValue;
 }

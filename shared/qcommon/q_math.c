@@ -1126,6 +1126,11 @@ float VectorLengthSquared( const vec3_t vec )
 	return (vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
 }
 
+float VectorLengthSquared2(vec2_t const v)
+{
+    return (v[0] * v[0] + v[1] * v[1]);
+}
+
 float Distance( const vec3_t p1, const vec3_t p2 )
 {
 	vec3_t	v;

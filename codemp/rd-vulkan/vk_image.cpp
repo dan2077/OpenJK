@@ -1412,4 +1412,6 @@ void R_InitImages( void )
 
 	// create default texture and white texture
 	R_CreateBuiltinImages();
+
+	vk_update_post_process_pipelines();
 }

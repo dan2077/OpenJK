@@ -861,9 +861,9 @@
 			textscale 		1
 			style			WINDOW_STYLE_FILLED
 			forecolor		.615 .615 .956 1
-			cvarStrList			{  "Vanilla" , "rd-vanilla" , "Vulkan", "rd-vulkan", "Rend2" , "rd-rend2" }
+			cvarStrList			{  "Vanilla" , "rd-eternaljk" , "Vulkan", "rd-vulkan", "Rend2" , "rd-rend2e" }
 			descText			"Change the renderer library to use."
-			cvar				"cl_renderer"
+			cvar				"ui_cl_renderer"
 			visible				1
 
 			mouseenter
@@ -1640,7 +1640,7 @@
 			visible				0
 			descText			"Configure rend2 video options"
 			cvarTest			"cl_renderer"
-			hideCvar			{ "rd-vanilla" }
+			hideCvar			{ "rd-eternaljk" , "rd-vulkan" }
 
 			action
 			{
@@ -1676,7 +1676,7 @@
 			visible				0
 			descText			"Rend2 video settings"
 			cvarTest			"cl_renderer"
-			hideCvar			{ "rd-vanilla" }
+			hideCvar			{ "rd-eternaljk" , "rd-vulkan" }
 
 			action
 			{
@@ -1710,7 +1710,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Rendering in HDR Colorspace"
-			cvar				"r_hdr"
+			cvar				"ui_r_hdr"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -1730,6 +1730,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -1749,7 +1750,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Tonemapping"
-			cvar				"r_tonemap"
+			cvar				"ui_r_tonemap"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -1769,6 +1770,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -1788,7 +1790,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Autoexposure"
-			cvar				"r_autoexposure"
+			cvar				"ui_r_autoexposure"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -1808,6 +1810,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -1827,7 +1830,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Load hdr lighting data. (requires rend2 lighting data)"
-			cvar				"r_floatLightmap"
+			cvar				"ui_r_floatLightmap"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -1849,6 +1852,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -1868,7 +1872,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Enables normalmapping and specularmapping on static geometry."
-			cvar				"r_deluxemapping"
+			cvar				"ui_r_deluxemapping"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -1888,6 +1892,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -1940,7 +1945,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Render cubemaps for reflections."
-			cvar				"r_cubemapping"
+			cvar				"ui_r_cubemapping"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -1960,6 +1965,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -1979,7 +1985,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"How many reflection bounces to render in cubemaps."
-			cvar				"r_cubemappingBounces"
+			cvar				"ui_r_cubemappingBounces"
 			cvarFloatList
 			{
 				"0" 	0
@@ -2002,6 +2008,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -2021,7 +2028,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Parallax Occlusion Mapping (requires rend2 materials)"
-			cvar				"r_parallaxmapping"
+			cvar				"ui_r_parallaxmapping"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -2041,6 +2048,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -2060,7 +2068,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Generate normalmaps from diffuse textures."
-			cvar				"r_genNormalMaps"
+			cvar				"ui_r_genNormalMaps"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -2080,6 +2088,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}
@@ -2099,7 +2108,7 @@
 			textscale 			1
 			forecolor			.615 .615 .956 1
 			descText			"Screenspace ambient occlusion"
-			cvar				"r_ssao"
+			cvar				"ui_r_ssao"
 			cvarFloatList
 			{
 				@MENUS_OFF 	0
@@ -2119,6 +2128,7 @@
 			{
 				play			"sound/interface/button1.wav" ;
 				setcvar			ui_r_modified	1 ;
+				setcvar			ui_vidrestart	1 ;
 				show			applyChanges
 			}
 		}

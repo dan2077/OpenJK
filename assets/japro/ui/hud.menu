@@ -1,4 +1,6 @@
-// In Game HUD - by Darth NormaN 
+// In Game HUD 
+// 
+// defines from ui_shared.h
 
 assetGlobalDef 
 {
@@ -25,172 +27,113 @@ assetGlobalDef
 	{
 		name					"lefthud"
 		fullScreen				0						// MENU_FALSE
-		rect					36 348 150 32				// Size and position of the menu
-		visible					1						// Visible on open
+		rect					0 368 112 112				// Size and position of the menu
+		visible				1						// Visible on open
 
-		// Health tics
-		itemDef
-		{
-			name				health_tic5
-			background			"gfx/tayst_hud/health_tic_1"
-			forecolor			1 1 1 1
-			rect				153 92 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-		itemDef
-		{
-			name				health_tic6
-			background			"gfx/tayst_hud/health_tic_1"
-			forecolor			1 1 1 1
-			rect				136 92 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-		itemDef
-		{
-			name				health_tic7
-			background			"gfx/tayst_hud/health_tic_1"
-			forecolor			1 1 1 1
-			rect				119 92 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
+		// Metal Frame
 		itemDef 
 		{
-			name				health_tic8
-			background			"gfx/tayst_hud/health_tic_1"
+			name				"frame"
 			forecolor			1 1 1 1
-			rect				102 92 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
+			background			"gfx/hud/hudleft"
+			rect				0 0 112 112				// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, char size, char height
 		}		
 
+
+		// Health tics
 		itemDef 
 		{
 			name				health_tic1
-			background			"gfx/tayst_hud/health_tic_1"
+			background			"gfx/hud/health_tic_1"
 			forecolor			1 1 1 1
-			rect				85 92 15 8			// (these positions are relative to the initial position of the menu)
+			rect				20 24 28 28			// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				health_tic2
-			background			"gfx/tayst_hud/health_tic_1"
+			background			"gfx/hud/health_tic_2"
 			forecolor			1 1 1 1
-			rect				68 92 15 8			// (these positions are relative to the initial position of the menu)
+			rect				38 33 28 28			// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				health_tic3
-			background			"gfx/tayst_hud/health_tic_1"
+			background			"gfx/hud/health_tic_3"
 			forecolor			1 1 1 1
-			rect				51 92 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-
-		itemDef
-		{
-			name				health_tic4
-			background			"gfx/tayst_hud/health_tic_1"
-			forecolor			1 1 1 1
-			rect				34 92 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-		itemDef
-    	{
-    		name				health_icon
-    		background			"gfx/tayst_hud/health"
-    		forecolor			1 1 1 1
-    		rect				15 88 16 16			// (these positions are relative to the initial position of the menu)
-    										        // X pos, Y pos, graphic size, graphic height
-    	}
-
-				// Armor tics
-		itemDef
-		{
-			name				armor_tic5
-			background			"gfx/tayst_hud/armor_tic_1"
-			forecolor			1 1 1 1
-			rect				160 65 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-		itemDef
-		{
-			name				armor_tic6
-			background			"gfx/tayst_hud/armor_tic_1"
-			forecolor			1 1 1 1
-			rect				143 65 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-		itemDef
-		{
-			name				armor_tic7
-			background			"gfx/tayst_hud/armor_tic_1"
-			forecolor			1 1 1 1
-			rect				126 65 15 8			// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, graphic size, graphic height
-		}
-
-		itemDef 
-		{
-			name				armor_tic8
-			background			"gfx/tayst_hud/armor_tic_1"
-			forecolor			1 1 1 1
-			rect				109 65 15 8			// (these positions are relative to the initial position of the menu)
+			rect				52 47 28 28			// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
-			name				armor_tic1
-			background			"gfx/tayst_hud/armor_tic_1"
+			name				health_tic4
+			background			"gfx/hud/health_tic_4"
 			forecolor			1 1 1 1
-			rect				92 65 15 8			// (these positions are relative to the initial position of the menu)
+			rect				60 65 28 28			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
+		}		
+
+		// Armor tics
+		itemDef 
+		{
+			name				armor_tic1
+			background			"gfx/hud/armor_tic_1"
+			forecolor			1 1 1 1
+			rect				9 -6 56 56			// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				armor_tic2
-			background			"gfx/tayst_hud/armor_tic_1"
+			background			"gfx/hud/armor_tic_2"
 			forecolor			1 1 1 1
-			rect				75 65 15 8			// (these positions are relative to the initial position of the menu)
+			rect				34 3 56 56			// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				armor_tic3
-			background			"gfx/tayst_hud/armor_tic_1"
+			background			"gfx/hud/armor_tic_3"
 			forecolor			1 1 1 1
-			rect				58 65 15 8			// (these positions are relative to the initial position of the menu)
+			rect				54 24 56 56			// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, graphic size, graphic height
-		}
-		itemDef
-    	{
-    		name				armor_tic4
-    		background			"gfx/tayst_hud/armor_tic_1"
-    		forecolor			1 1 1 1
-    		rect				41 65 15 8			// (these positions are relative to the initial position of the menu)
-    										        // X pos, Y pos, graphic size, graphic height
-    	}
-		itemDef
-    	{
-    		name				armor_icon
-    		background			"gfx/tayst_hud/shield"
-    		forecolor			1 1 1 1
-    		rect				22 61 16 16			// (these positions are relative to the initial position of the menu)
-    										        // X pos, Y pos, graphic size, graphic height
-    	}
+		}		
+
+		itemDef 
+		{
+			name				armor_tic4
+			background			"gfx/hud/armor_tic_4"
+			forecolor			1 1 1 1
+			rect				63 48 56 56			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
+		}		
+
+		// Scan line
+//		itemDef 
+//		{
+//			name				scanline
+//			group				none
+//			background			"gfx/hud/hudleft_scanline"
+//			forecolor			1 1 1 1
+//			rect				23 8 80 80			// (these positions are relative to the initial position of the menu) 
+//												// X pos, Y pos, char size, char height
+//			visible			1
+//		}		
 
 		// Numeric counter for armor
 		itemDef 
 		{
 			name				armoramount
 			group				none
-			forecolor			1 1 .1 1
-			rect				39 42 6 12				// (these positions are relative to the initial position of the menu)
+			forecolor			0.0 .613 .097 1
+			rect				85 98 6 12				// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, char size, char height
 			visible			1
 		}		
@@ -200,8 +143,8 @@ assetGlobalDef
 		{
 			name				healthamount
 			group				none
-			forecolor			1 1 1 1
-			rect				32 69 6 12				// (these positions are relative to the initial position of the menu)
+			forecolor			.835 .015 .015 1
+			rect				59 98 6 12				// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, char size, char height
 		}		
 
@@ -239,96 +182,120 @@ assetGlobalDef
 	menuDef 
 	{
 		name					"righthud"
-		fullScreen				0
-		rect					604 348 -150 32
-		visible				1
-		focusColor				1 1 1 1	
-		appearanceIncrement		75
+		fullScreen				0						// MENU_FALSE
+		rect					640 368 -112 112				// Size and position of the menu
+		visible				1						// Visible on open
+		focusColor				1 1 1 1					// Focus color for text and items
+		appearanceIncrement		75						// In miliseconds
 		descX					320
 		descY					434
-		descColor				.96 .933 .40 1
+		descColor				.96 .933 .40 1				// Focus color for text and items
+
+		// Scan line
+//		itemDef 
+//		{
+//			name				scanline
+//			group				none
+//			background			"gfx/hud/hudleft_scanline"
+//			forecolor			1 1 1 1
+//			rect				-23 8 -80 80			// (these positions are relative to the initial position of the menu) 
+//												// X pos, Y pos, char size, char height
+//		}		
+
+		// Metal Frame
+		itemDef 
+		{
+			name				"frame"
+			forecolor			1 1 1 1
+			background			"gfx/hud/hudleft"
+			rect				0 0 -112 112			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, char size, char height
+		}		
+
 
 		// Ammo tics
 		itemDef 
 		{
 			name				ammo_tic1
-			background			"gfx/tayst_hud/ammo_tic_1"
+			background			"gfx/hud/ammo_tic_1"
 			forecolor			1 1 1 1
-			rect				-114 65 15 8
+			rect				-48  25 28 28			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				ammo_tic2
-			background			"gfx/tayst_hud/ammo_tic_1"
+			background			"gfx/hud/ammo_tic_2"
 			forecolor			1 1 1 1
-			rect				-97 65 15 8
+			rect				-66  33 28 28			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				ammo_tic3
-			background			"gfx/tayst_hud/ammo_tic_1"
+			background			"gfx/hud/ammo_tic_3"
 			forecolor			1 1 1 1
-			rect				-80 65 15 8
+			rect				-80  47 28 28			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				ammo_tic4
-			background			"gfx/tayst_hud/ammo_tic_1"
+			background			"gfx/hud/ammo_tic_4"
 			forecolor			1 1 1 1
-			rect				-63 65 15 8
+			rect				-88  65 28 28			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		// Force tics
 		itemDef 
 		{
 			name				force_tic1
-			background			"gfx/tayst_hud/force_tic_1"
+			background			"gfx/hud/force_tic_1"
 			forecolor			1 1 1 1
-			rect				-107 92 15 8
+			rect				-65  -5 56 56			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				force_tic2
-			background			"gfx/tayst_hud/force_tic_1"
+			background			"gfx/hud/force_tic_2"
 			forecolor			1 1 1 1
-			rect				-90 92 15 8
+			rect				-89  4 56 56			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				force_tic3
-			background			"gfx/tayst_hud/force_tic_1"
+			background			"gfx/hud/force_tic_3"
 			forecolor			1 1 1 1
-			rect				-73 92 15 8
+			rect				-109  24 56 56			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
 		itemDef 
 		{
 			name				force_tic4
-			background			"gfx/tayst_hud/force_tic_1"
+			background			"gfx/hud/force_tic_4"
 			forecolor			1 1 1 1
-			rect				-56 92 15 8
+			rect				-119  48 56 56			// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, graphic size, graphic height
 		}		
 
-		itemDef
-    	{
-    		name				force_icon
-    		background			"gfx/tayst_hud/force"
-    		forecolor			1 1 1 1
-    		rect				-37 88 16 16
-    	}
 
 		// Numeric counter for force
 		itemDef 
 		{
 			name				forceamount
 			group				none
-			rect				-68 69 6 12
-			forecolor			1 1 1 1
+			rect				-109 98 6 12				// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, char size, char height
+			forecolor			.359 .524 .722 1
 		}		
 
 		// Numeric counter for ammo
@@ -336,115 +303,77 @@ assetGlobalDef
 		{
 			name				ammoamount
 			group				none
-			rect				-75 42 6 12
+			rect				-83 98 6 12				// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, char size, char height
 			forecolor			1.0 .658 .062 1
 		}		
 
 		// When ammo is infinite (used in MP)
-		/*itemDef 
+		itemDef 
 		{
 			name				ammoinfinite
 			group				none
-			rect				-125 42 6 12
+			rect				-75 87 6 12				// (these positions are relative to the initial position of the menu) 
+												// X pos, Y pos, char size, char height
 			forecolor			1.0 .658 .062 1
-		}*/		
+		}		
 
 
 		// Saber style graphics
 		itemDef 
 		{
 			name				saberstyle_strong
-			background			"gfx/tayst_hud/saber_strong"
+			background			"gfx/hud/saber_strong"
 			forecolor			1 1 1 1
-			rect				-116 65 90 6				// (these positions are relative to the initial position of the menu)
+			rect				-49 24 26 26				// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, char size, char height
 		}		
 
 		itemDef 
 		{
 			name				saberstyle_medium
-			background			"gfx/tayst_hud/saber_med"
+			background			"gfx/hud/saber_med"
 			forecolor			1 1 1 1
-			rect				-116 65 90 6				// (these positions are relative to the initial position of the menu)
+			rect				-70 43 26 26				// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, char size, char height
 		}		
 
 		itemDef 
 		{
 			name				saberstyle_fast
-			background			"gfx/tayst_hud/saber_fast"
+			background			"gfx/hud/saber_fast"
 			forecolor			1 1 1 1
-			rect				-116 65 90 6				// (these positions are relative to the initial position of the menu)
+			rect				-85 69 24 24				// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, char size, char height
 		}
 
 		itemDef
 		{
 			name				saberstyle_dual
-			background			"gfx/tayst_hud/saber_dual"
+			background			"gfx/hud/saber_dual"
 			forecolor			1 1 1 1
-			rect				-116 65 90 6				// (these positions are relative to the initial position of the menu)
+			rect				-70 43 26 26				// (these positions are relative to the initial position of the menu)
 												// X pos, Y pos, char size, char height
 		}
 
-		itemDef
+		itemDef 
 		{
 			name				saberstyle_staff
-			background			"gfx/tayst_hud/saber_staff"
+			background			"gfx/hud/saber_staff"
 			forecolor			1 1 1 1
-			rect				-116 65 90 6				// (these positions are relative to the initial position of the menu)
+			rect				-49 24 26 26				// (these positions are relative to the initial position of the menu)
 												// X pos, Y pos, char size, char height
-		}
+		}	
 
 		// Tells current score of game
 		itemDef 
 		{
 			name				score_line
 			forecolor			1 1 1 1
-			rect				-10 112 6 12				// (these positions are relative to the initial position of the menu)
+			rect				-150 92 6 12				// (these positions are relative to the initial position of the menu) 
 												// X pos, Y pos, char size, char height
-		}
+		}		
 
-		itemDef
-		{
-			name				power_cell_ammo
-			background			"gfx/mp/ammo_power_cell"
-			forecolor			1 1 1 1
-			rect				-44 61 16 16				// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, char size, char height
-		}
-		itemDef
-		{
-			name				metallic_bolts_ammo
-			background			"gfx/mp/ammo_metallic_bolts"
-			forecolor			1 1 1 1
-			rect				-44 61 16 16				// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, char size, char height
-		}
-		itemDef
-		{
-			name				blaster_ammo
-			background			"gfx/hud/i_icon_battery"
-			forecolor			1 1 1 1
-			rect				-44 61 16 16				// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, char size, char height
-		}
-		itemDef
-		{
-			name				rockets_ammo
-			background			"gfx/mp/ammo_rockets"
-			forecolor			1 1 1 1
-			rect				-44 61 16 16				// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, char size, char height
-		}
-		itemDef
-		{
-			name				ammo_infinite
-			background			"gfx/tayst_hud/ammo_infinite"
-			forecolor			1 1 1 1
-			rect				-44 61 16 16				// (these positions are relative to the initial position of the menu)
-												// X pos, Y pos, char size, char height
-		}
 	}
 
 	menuDef 

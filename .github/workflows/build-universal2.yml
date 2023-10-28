@@ -1,0 +1,109 @@
+name: build-universal2
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  macos-universal2:
+    name: macOS ${{ matrix.arch }} ${{ matrix.build_type }} (${{ matrix.portable}})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [universal2]
+        build_type: [Release]
+        portable: [Non-Portable]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get dependencies
+        run: |
+          brew update
+          brew install cmake dylibbundler sdl2 zlib libjpeg libpng
+
+      - name: Make build
+        run: |
+          chmod +x macsourceports_universal2.sh
+          chmod +x scripts/universal2/build_app_bundle.sh
+          chmod +x scripts/universal2/constants.sh
+          chmod +x scripts/universal2/sign_and_notarize.sh
+          ./macsourceports_universal2.sh
+
+      - name: Create binary archive
+        if: ${{ matrix.build_type == 'Release' }}
+        working-directory: ${{ runner.workspace }}
+        shell: bash
+        run: |
+          tar -czvf TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz TaystJK/release/*
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ matrix.build_type == 'Release' }}
+        with:
+          name: TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}
+          path: ${{ runner.workspace }}/TaystJK-macos-${{ matrix.arch }}-${{ matrix.build_type }}-${{ matrix.portable }}.tar.gz
+          if-no-files-found: error
+
+  create-latest:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    needs: [macos-universal2]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create binary archives
+        run: |
+          mv ./TaystJK-macos-arm64-Release-Non-Portable/*  TaystJK-macos-universal2.tar.gz
+
+      - name: Create latest build
+        uses: ModeSevenIndustrialSolutions/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: "universal2"
+          prerelease: false
+          title: Universal2 Build
+          files: |
+            *.tar.gz
+
+  create-release:
+    if: github.event_name == 'release'
+    needs: [macos-universal2]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - artifact_dir: TaystJK-macos-universal2.tar.gz
+            artifact_name: TaystJK-macos-universal2.tar.gz
+            zip: false
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create archive
+        run: |
+          if [ "${{ matrix.zip }}" == "true" ]; then
+            7z a -r ${{ matrix.artifact_name }} ./${{ matrix.artifact_dir }}/* '-x!msvcp*.*' '-x!vcruntime*.*' '-x!concrt*.*'
+          else
+            mv ./${{ matrix.artifact_dir }}/* ${{ matrix.artifact_name }}
+          fi
+
+      - name: Upload archives
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          overwrite: true
+          file: ${{ matrix.artifact_name }}
