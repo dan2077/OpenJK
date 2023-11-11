@@ -968,6 +968,9 @@ void Con_DrawSolidConsole( float frac ) {
 		SCR_DrawSmallChar(cls.glconfig.vidWidth - (i - x) * con.charWidth, lines - (con.charHeight + con.charHeight / 2) + padding, ts[x]);
 	}
 
+	// draw the input prompt, user text, and cursor if desired
+	Con_DrawInput ();
+
 	// draw the text
 	con.vislines = lines;
 	rows = (lines-con.charWidth)/con.charWidth;		// rows of text to draw
@@ -1054,9 +1057,6 @@ void Con_DrawSolidConsole( float frac ) {
 			}
 		}
 	}
-
-	// draw the input prompt, user text, and cursor if desired
-	Con_DrawInput ();
 
 	re->SetColor( NULL );
 }
