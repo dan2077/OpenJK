@@ -458,6 +458,7 @@ void DF_StrafeHelper() {
 //sets the dfstate function used for strafehelper calculations
 void DF_SetPlayerState(centity_t	*cent)
 {
+	state.moveStyle = DF_GetMovePhysics();
     state.velocity = cg.predictedPlayerState.velocity;
     if (state.moveStyle == MV_SWOOP && cg.predictedPlayerState.m_iVehicleNum) {
         centity_t *vehCent = &cg_entities[cg.predictedPlayerState.m_iVehicleNum];
@@ -473,7 +474,6 @@ void DF_SetPlayerState(centity_t	*cent)
     } else {
         return;
     }
-    state.moveStyle = DF_GetMovePhysics();
     DF_SetPhysics();
     state.onGround = (qboolean)(cg.predictedPlayerState.groundEntityNum == ENTITYNUM_WORLD); //on ground this frame
     if (!(cg_strafeHelper.integer & SHELPER_ORIGINAL) && !cg.renderingThirdPerson)
