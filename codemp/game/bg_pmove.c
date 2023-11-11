@@ -4451,10 +4451,15 @@ static void PM_WalkMove( void ) {
 		}
 		else
 #endif
-			if (pm->ps->stats[STAT_RACEMODE])
-				pm->ps->velocity[2] -= 800 * pml.frametime; //Use 800 as gravity instead of 750 if racemode - fixes sliding down slick slopes like lappen
+		if (pm->ps->stats[STAT_RACEMODE]) {
+			float adjust = pml.frametime;
+			if (adjust > 0.008f) {  //w/e
+				adjust = 0.008f;
+			}
+			pm->ps->velocity[2] -= 800.0f * adjust;
+		}
 			else
-				pm->ps->velocity[2] -= pm->ps->gravity * pml.frametime;
+			pm->ps->velocity[2] -= pm->ps->gravity * pml.frametime; //cap frametime here since its capped elsewhere? or uncap? or?
 	}
 
 
