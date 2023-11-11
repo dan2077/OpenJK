@@ -10093,7 +10093,12 @@ void BG_AdjustClientSpeed(playerState_t *ps, usercmd_t *cmd, int svTime)
 
 	if ( cmd->forwardmove < 0 && !(cmd->buttons&BUTTON_WALKING) && pm->ps->groundEntityNum != ENTITYNUM_NONE && !JK2SWINGS(ps) )
 	{//running backwards is slower than running forwards (like SP)
-		ps->speed *= 0.75f;
+#ifdef _GAME
+		if (!(g_tweakSaber.integer & ST_ALLOW_ROLLCANCEL) || pm->ps->stats[STAT_RACEMODE])
+#else
+		if (!(cgs.jcinfo & JAPRO_CINFO_ROLLCANCEL) || pm->ps->stats[STAT_RACEMODE])
+#endif
+			ps->speed *= 0.75f;
 	}
 
 //[JAPRO - Serverside + Clientside - Force - Add fast grip option - Start]
