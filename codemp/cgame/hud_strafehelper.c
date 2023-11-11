@@ -1969,7 +1969,7 @@ japro - Draw the movement keys
         if(cg_raceStart.integer)
         {
             if(cg_startGoal.value && (cg_startGoal.value <= (float)cg.startSpeed)){
-                float startColor = 1 / (((float)cg.startSpeed/250)*((float)cg.startSpeed/250));
+                float startColor = 1 / (((float)cg.startSpeed/state.cgaz.wishspeed)*((float)cg.startSpeed/state.cgaz.wishspeed));
                 colorStartSpeed[0] = startColor;
                 colorStartSpeed[1] = 1;
                 colorStartSpeed[2] = startColor;
