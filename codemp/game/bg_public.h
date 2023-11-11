@@ -566,6 +566,7 @@ typedef enum //movementstyle enum
 #if _COOP
 	MV_COOP_JKA,
 #endif
+	MV_OCPM,
 	MV_NUMSTYLES,
 } movementStyle_e;
 
@@ -1990,5 +1991,7 @@ extern  const   float 	pm_slick_friction;
 
 extern	const	float	pm_qw_airaccelerate;
 extern	const	float	pm_qw_friction;
+extern	const	float	pm_qw_airstrafewishspeed;
 
 extern	const	float	pm_jetpack_airaccelerate;
+int PM_GetMovePhysics(void);

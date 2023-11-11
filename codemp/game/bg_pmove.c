@@ -104,12 +104,12 @@ const float pm_wsw_duckScale = 0.3125f;
 const float pm_slick_accelerate = 30.0f;
 const float	pm_slick_airstrafeaccelerate = 100.0f;
 const float	pm_slick_friction = 0.0f;
+
 const float	pm_jetpack_airaccelerate = 1.4f;
-
-
 
 const float pm_qw_airaccelerate = 0.7f;
 const float pm_qw_friction = 4.0f;
+const float	pm_qw_airstrafewishspeed = 30.0f;
 
 //japro/dfmania movement parameters
 
@@ -413,23 +413,16 @@ static QINLINE qboolean PM_IsRocketTrooper(void)
 	return qfalse;
 }
 
-int PM_GetMovePhysics(void);
 QINLINE int PM_GetMovePhysics(void)
 {
 #if _GAME
 	if (pm->ps->stats[STAT_RACEMODE]) {
-		if (pm->ps->stats[STAT_RACEMODE] >= MV_COOP_JKA)
-			return (pm->ps->stats[STAT_MOVEMENTSTYLE] - (MV_COOP_JKA - 1));
-
 		return pm->ps->stats[STAT_MOVEMENTSTYLE];
-	}
-	else if (g_movementStyle.integer >= MV_SIEGE && g_movementStyle.integer < MV_NUMSTYLES) {
+	} else if ((g_movementStyle.integer >= MV_SIEGE && g_movementStyle.integer <= MV_WSW) || (g_movementStyle.integer == MV_SP || g_movementStyle.integer == MV_SLICK || g_movementStyle.integer == MV_OCPM)) {
 		return g_movementStyle.integer;
-	}
-	else if (g_movementStyle.integer < MV_SIEGE) {
+	} else if (g_movementStyle.integer < MV_SIEGE) {
 		return MV_SIEGE;
-	}
-	else if (g_movementStyle.integer >= MV_NUMSTYLES) {
+	} else if (g_movementStyle.integer >= MV_NUMSTYLES) {
 		return MV_JKA;
 	}
 #else
@@ -439,10 +432,6 @@ QINLINE int PM_GetMovePhysics(void)
 
 		if (pm->ps->m_iVehicleNum)
 			return MV_SWOOP;
-
-		if (pm->ps->stats[STAT_MOVEMENTSTYLE] >= MV_COOP_JKA)
-			return (pm->ps->stats[STAT_MOVEMENTSTYLE] - (MV_COOP_JKA - 1));
-
 		return pm->ps->stats[STAT_MOVEMENTSTYLE];
 	}
 	else if (cgs.gametype == GT_SIEGE) {
@@ -1318,15 +1307,15 @@ void PM_AirAccelerate (vec3_t wishdir, float wishspeed, float accel)
 		if (pm->ps->pm_flags & PMF_TIME_WATERJUMP)
 			return;
         
-        if (wishspd > 30)
-                wishspd = 30;
+        if (wishspd > pm_qw_airstrafewishspeed)
+                wishspd = pm_qw_airstrafewishspeed;
 
         currentspeed = DotProduct (pm->ps->velocity, wishdir);
         addspeed = wishspd - currentspeed;// See how much to add
         if (addspeed <= 0)// If not adding any, done.
                 return;
 
-        accelspeed = accel * wishspeed * pml.frametime * 4.0f;// QUAKECLASSIC: accelspeed = accel * wishspeed * pmove->frametime * pmove->friction;
+        accelspeed = accel * wishspeed * pml.frametime * pm_qw_friction;// QUAKECLASSIC: accelspeed = accel * wishspeed * pmove->frametime * pmove->friction;
         
         if (accelspeed > addspeed) // Cap it
                 accelspeed = addspeed;
@@ -1438,9 +1427,13 @@ static float PM_CmdScale( usercmd_t *cmd ) {
 	float	scale;
 	int		umove = 0; //cmd->upmove;
 			//don't factor upmove into scaling speed
+	const int moveStyle = PM_GetMovePhysics();
 
+	if (moveStyle == MV_OCPM) {
+		umove = cmd->upmove;
+	}
 #if _SPPHYSICS
-	if (PM_GetMovePhysics() == MV_SP) { //Oh no..
+	else if (moveStyle == MV_SP) { //Oh no..
 		umove = cmd->upmove;
 	}
 #endif
@@ -1534,7 +1527,7 @@ qboolean PM_ForceJumpingUp(void)
 
 	moveStyle = PM_GetMovePhysics();
 
-	if (moveStyle == MV_CPM || moveStyle == MV_Q3 || moveStyle == MV_WSW || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_JETPACK || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
+	if (moveStyle == MV_CPM || moveStyle == MV_Q3 || moveStyle == MV_WSW || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_JETPACK || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM || moveStyle == MV_OCPM)
 		return qfalse;
 
 	if (!BG_CanUseFPNow(pm->gametype, pm->ps, pm->cmd.serverTime, FP_LEVITATION))
@@ -2502,6 +2495,7 @@ static qboolean PM_CheckJump( void )
 		!PM_IsRocketTrooper() &&
 		!BG_HasYsalamiri(pm->gametype, pm->ps) &&
 		(moveStyle != MV_CPM) &&
+		(moveStyle != MV_OCPM) &&
 		(moveStyle != MV_Q3) &&
 		(moveStyle != MV_WSW) &&
 		(moveStyle != MV_RJQ3) &&
@@ -3243,14 +3237,14 @@ static qboolean PM_CheckJump( void )
 	}
 	if ( pm->cmd.upmove > 0 )
 	{//no special jumps
-		if (moveStyle == MV_QW || moveStyle == MV_CPM || moveStyle == MV_Q3 || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
+		if (moveStyle == MV_QW || moveStyle == MV_CPM || moveStyle == MV_OCPM || moveStyle == MV_Q3 || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
 		{
 			vec3_t hVel;
 			float added, xyspeed, realjumpvelocity = JUMP_VELOCITY;
 			
 			if (moveStyle == MV_WSW)
 				realjumpvelocity = 280.0f;
-			else if (moveStyle == MV_CPM || moveStyle == MV_Q3 || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
+			else if (moveStyle == MV_CPM || moveStyle == MV_OCPM || moveStyle == MV_Q3 || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
 				realjumpvelocity = 270.0f;
 
 			hVel[0] = pm->ps->velocity[0];
@@ -3810,12 +3804,12 @@ static void PM_AirMove( void ) {
 
 #if _SPPHYSICS
 	if (moveStyle == MV_SP) {
-		accelerate = 4.0f;
+		accelerate = pm_sp_airaccelerate;
 
 		//SP Air Decel ?
 		if ((DotProduct(pm->ps->velocity, wishdir)) < 0.0f)
 		{//Encourage deceleration away from the current velocity
-			wishspeed *= 1.35f;//pm_airDecelRate
+			wishspeed *= pm_sp_airDecelRate;//pm_airDecelRate
 		}
 	}
 #endif
@@ -3831,28 +3825,26 @@ static void PM_AirMove( void ) {
 	}
 	// not on ground, so little effect on velocity
 	if (moveStyle == MV_QW)
-		PM_AirAccelerate(wishdir, wishspeed, 0.7f);//pm_qw_airaccel
-	else if (moveStyle == MV_CPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
+		PM_AirAccelerate(wishdir, wishspeed, pm_qw_airaccelerate);
+	else if (moveStyle == MV_CPM || moveStyle == MV_OCPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM)
 	{
 		float		accel;
 		float		wishspeed2;
 
 		wishspeed2 = wishspeed;
 		if (DotProduct(pm->ps->velocity, wishdir) < 0)
-			accel = 2.5f;//cpm_pm_airstopaccelerate 
+			accel = pm_cpm_airstopaccelerate;
 		else
 			accel = pm_airaccelerate;
 
 		if (pm->ps->movementDir == 2 || pm->ps->movementDir == 6) {
-			if (moveStyle == MV_CPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM) {
-				if (wishspeed > 30.0f)//cpm_pm_wishspeed
-					wishspeed = 30.0f;	
-				accel = 70.0f;//cpm_pm_strafeaccelerate
+			if (moveStyle == MV_CPM || moveStyle == MV_OCPM || moveStyle == MV_PJK || moveStyle == MV_WSW || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM || moveStyle == MV_SLICK) {
+				if (wishspeed > pm_cpm_airstrafewishspeed)
+					wishspeed = pm_cpm_airstrafewishspeed;
+				accel = pm_cpm_airstrafeaccelerate;
 			}
-			else if (moveStyle == MV_SLICK) {
-				if (wishspeed > 30.0f)//cpm_pm_wishspeed
-					wishspeed = 30.0f;	
-				accel = 100.0f;//cpm_pm_strafeaccelerate - 100 in slick
+			if (moveStyle == MV_SLICK) {
+				accel = pm_slick_airstrafeaccelerate;
 			}
 		}
 
@@ -4301,21 +4293,21 @@ static void PM_WalkMove( void ) {
 		}
 	}
 
-	if (moveStyle == MV_CPM || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM)
-		realaccelerate = 15.0f;
+	if (moveStyle == MV_CPM || moveStyle == MV_OCPM || moveStyle == MV_RJCPM || moveStyle == MV_BOTCPM)
+		realaccelerate = pm_cpm_accelerate;
 	else if (moveStyle == MV_Q3 || moveStyle == MV_RJQ3)
-		realduckscale = 0.25f;
+		realduckscale = pm_vq3_duckScale;
 	else if (moveStyle == MV_WSW) {
-		realaccelerate = 12.0f;
-		realduckscale = 0.3125f;
+		realaccelerate = pm_wsw_accelerate;
+		realduckscale = pm_wsw_duckScale;
 	}
 #if _SPPHYSICS
 	else if (moveStyle == MV_SP) {
-		realaccelerate = 12.0f;
+		realaccelerate = pm_sp_accelerate;
 	}
 #endif
 	else if (moveStyle == MV_SLICK) {
-		realaccelerate = 30.0f;
+		realaccelerate = pm_slick_accelerate;
 	}
 
 	PM_Friction ();
@@ -4422,6 +4414,10 @@ static void PM_WalkMove( void ) {
 	else if (((pml.groundTrace.surfaceFlags & SURF_SLICK) && moveStyle != MV_SLICK) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK)
 	{//We just ignore this with slick style since we area always slick, we dont need the flag to tell us that
 		accelerate = pm_airaccelerate; //this should be changed for QW and other stuff, but whatever, already done
+		if (moveStyle == MV_OCPM)
+			accelerate = pm_cpm_accelerate;
+		else
+			accelerate = pm_airaccelerate; //this should be changed for QW and other stuff, but whatever, already done
 	}
 	else
 	{
@@ -4458,7 +4454,7 @@ static void PM_WalkMove( void ) {
 			}
 			pm->ps->velocity[2] -= 800.0f * adjust;
 		}
-			else
+		else
 			pm->ps->velocity[2] -= pm->ps->gravity * pml.frametime; //cap frametime here since its capped elsewhere? or uncap? or?
 	}
 
@@ -4652,6 +4648,7 @@ static int PM_TryRoll( void )
 		PM_IsRocketTrooper() ||
 		BG_HasYsalamiri(pm->gametype, pm->ps) ||
 		(moveStyle == MV_CPM) ||
+		(moveStyle == MV_OCPM) ||
 		(moveStyle == MV_Q3) ||
 		(moveStyle == MV_WSW) ||
 		(moveStyle == MV_RJQ3) ||
@@ -5047,7 +5044,7 @@ static void PM_CrashLand( void ) {
 	// make sure velocity resets so we don't bounce back up again in case we miss the clear elsewhere
 	pm->ps->velocity[2] = 0;
 
-	if ((moveStyle == MV_CPM || moveStyle == MV_Q3 || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM) && ((int)pm->ps->fd.forceJumpZStart > pm->ps->origin[2] + 1)) {
+	if ((moveStyle == MV_CPM || moveStyle == MV_OCPM || moveStyle == MV_Q3 || moveStyle == MV_RJQ3 || moveStyle == MV_RJCPM || moveStyle == MV_SLICK || moveStyle == MV_BOTCPM) && ((int)pm->ps->fd.forceJumpZStart > pm->ps->origin[2] + 1)) {
 		if (1 > (sqrt(pm->ps->velocity[0] * pm->ps->velocity[0] + pm->ps->velocity[1] * pm->ps->velocity[1])))//No xyvel
 			pm->ps->velocity[2] = -vel; //OVERBOUNCE OVER BOUNCE
 	}
@@ -10091,14 +10088,15 @@ void BG_AdjustClientSpeed(playerState_t *ps, usercmd_t *cmd, int svTime)
 	}
 
 
-	if ( cmd->forwardmove < 0 && !(cmd->buttons&BUTTON_WALKING) && pm->ps->groundEntityNum != ENTITYNUM_NONE && !JK2SWINGS(ps) )
+	if ( cmd->forwardmove < 0 && !(cmd->buttons&BUTTON_WALKING) && pm->ps->groundEntityNum != ENTITYNUM_NONE )
 	{//running backwards is slower than running forwards (like SP)
 #ifdef _GAME
 		if (!(g_tweakSaber.integer & ST_ALLOW_ROLLCANCEL) || pm->ps->stats[STAT_RACEMODE])
 #else
 		if (!(cgs.jcinfo & JAPRO_CINFO_ROLLCANCEL) || pm->ps->stats[STAT_RACEMODE])
 #endif
-			ps->speed *= 0.75f;
+			if (ps->stats[STAT_MOVEMENTSTYLE] != MV_OCPM)
+				ps->speed *= 0.75f; //JK2 1.02 doesn't have this? does q3 / wsw?
 	}
 
 //[JAPRO - Serverside + Clientside - Force - Add fast grip option - Start]
@@ -13179,11 +13177,11 @@ void PmoveSingle (pmove_t *pmove) {
                         else
                             optimalDeltaAngle = -6;
                     else {
-                        float realAccel = 1.0f;
+                        float realAccel = pm_airaccelerate;
                         if (moveStyle == MV_SP)
-                            realAccel = 4.0f;
+                            realAccel = pm_sp_airaccelerate;
                         else if (moveStyle == MV_SLICK)
-                            realAccel = 30.0f;
+                            realAccel = pm_slick_accelerate;
                         //jetpack. 1.4f ?
                         optimalDeltaAngle = (acos((double)((pm->ps->basespeed - (realAccel * pm->ps->basespeed * pml.frametime)) / realCurrentSpeed)) * (180.0f / M_PI) - 45.0f);
                         if (optimalDeltaAngle < 0 || optimalDeltaAngle > 360)
@@ -13364,7 +13362,7 @@ void PmoveSingle (pmove_t *pmove) {
 		trap->SnapVector( pm->ps->velocity ); 
 	}
 	else {
-		if (pm->ps->stats[STAT_RACEMODE] || pm->pmove_float > 1) {//japro fix racemode fps
+		if ((pm->ps->stats[STAT_RACEMODE] && (pm->ps->stats[STAT_MOVEMENTSTYLE] != MV_OCPM)) || (!pm->ps->stats[STAT_RACEMODE] && (pm->pmove_float > 1))) {//japro fix racemode fps
 		}
 	#ifdef _GAME
 		else if (g_fixHighFPSAbuse.integer && ((pml.msec < 4) || (pml.msec > 25))) { //More than 333fps, or less than 40fps.
@@ -13484,7 +13482,7 @@ void Pmove (pmove_t *pmove) {
 		msec = finalTime - pmove->ps->commandTime;
 		if (pmove->ps->stats[STAT_RACEMODE]) { //Using float now
 			if ( msec > 8 ) {
-				if (BG_InRollFixed(pmove->ps, pmove->ps->legsAnim)) {
+				if (BG_InRollFixed(pmove->ps, pmove->ps->legsAnim) || (pmove->ps->stats[STAT_MOVEMENTSTYLE] == MV_OCPM)) {
 					msec = 8;
 				}
 				/*else if (msec > 16) {

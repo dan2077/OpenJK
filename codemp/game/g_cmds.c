@@ -6679,7 +6679,7 @@ static void Cmd_MovementStyle_f(gentity_t *ent)
 		return;
 
 	if (trap->Argc() != 2) {
-		trap->SendServerCommand( ent-g_entities, "print \"Usage: /move <siege, jka, qw, cpm, q3, pjk, wsw, rjq3, rjcpm, swoop, jetpack, speed, sp, slick, botcpm, or coop>.\n\"" );
+		trap->SendServerCommand( ent-g_entities, "print \"Usage: /move <siege, jka, qw, cpm, ocpm, q3, pjk, wsw, rjq3, rjcpm, swoop, jetpack, speed, sp, slick, botcpm, or coop>.\n\"" );
 		return;
 	}
 
@@ -6839,7 +6839,7 @@ static void Cmd_JumpChange_f(gentity_t *ent)
 		return;
 	}
 
-	if (ent->client->sess.movementStyle == MV_COOP_JKA || ent->client->sess.movementStyle == MV_Q3 || ent->client->sess.movementStyle == MV_CPM || ent->client->sess.movementStyle == MV_JETPACK ||
+	if (ent->client->sess.movementStyle == MV_COOP_JKA || ent->client->sess.movementStyle == MV_Q3 || ent->client->sess.movementStyle == MV_CPM || ent->client->sess.movementStyle == MV_OCPM || ent->client->sess.movementStyle == MV_JETPACK ||
 		ent->client->sess.movementStyle == MV_WSW || ent->client->sess.movementStyle == MV_BOTCPM || ent->client->sess.movementStyle == MV_SLICK) {
 		char styleString[16];
 		IntegerToRaceName(ent->client->sess.movementStyle, styleString, sizeof(styleString));
