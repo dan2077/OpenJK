@@ -708,11 +708,7 @@ dfsline DF_GetLine(int moveDir, qboolean rear, qboolean max) {
     if(moveDir % 2 == 0){ //if moveDir is even - it's a single key press
         if(state.physics.hasAirControl){ //air control uses the center line if on for single key presses
             if(moveDir < KEY_CENTER){
-                if(!state.strafeHelper.center){ //only draw these when center line is off
                     draw = qtrue;
-                } else {
-                    draw = qfalse;
-                }
             } else { //it's the center line
                 if (moveDir == KEY_CENTER && state.strafeHelper.center) {
                     draw = qtrue;
