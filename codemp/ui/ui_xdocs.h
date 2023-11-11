@@ -506,6 +506,19 @@ XDOCS_CVAR_DEF("cg_killfeedTextSize", "Resize the killfeed",""
 XDOCS_CVAR_DEF("cg_killfeedColors", "Color the killfeed icons",""
 )
 
+//PitchHUD
+XDOCS_CVAR_DEF("cg_pitchHud", "Enable/Disable the pitch HUD",""
+)
+XDOCS_CVAR_DEF("cg_pitchHud", "Set the pitch angle at which the bar is in the middle of the screen",""
+)
+XDOCS_CVAR_DEF("cg_pitchHudThickness", "Thickness",""
+)
+XDOCS_CVAR_DEF("cg_pitchHudX", "Horizontal position",""
+)
+XDOCS_CVAR_DEF("cg_pitchHudWidth", "Horizontal width",""
+)
+XDOCS_CVAR_DEF("cg_pitchHudRgba", "Color of the pitch HUD",""
+)
 //Work from above this line
 
 // ...

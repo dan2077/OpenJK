@@ -241,6 +241,11 @@ void DF_DrawStrafeHUD(centity_t	*cent)
 {
     //set the playerstate
     DF_SetPlayerState(cent); //state.
+
+	if (cg_pitchHud.integer) {
+		DF_DrawPitchHud(state.viewAngles[PITCH]);
+	}
+
     if (cg_strafeHelper.integer) {
         DF_StrafeHelper();
     }
@@ -2026,4 +2031,48 @@ void DF_DrawShowPos(void)
 
     CG_Text_Paint(SCREEN_WIDTH - (SCREEN_WIDTH - 340) * cgs.widthRatioCoef, 0, 0.6f, colorWhite,
                   showPosString, 0, 0, ITEM_TEXTSTYLE_OUTLINESHADOWED, FONT_SMALL2);
+}
+
+//PitchHUD
+/*
+==============
+DF_MarkAnglePitch
+==============
+*/
+void DF_MarkAnglePitch(float angle, float height, float viewangle, float x, float width, const float *color) {
+	float y, fovscale;
+	vec2_t cgamefov = { cg.refdef.fov_x, cg.refdef.fov_y };
+
+	if (-state.viewAngles[PITCH] + angle > cgamefov[1] / 2 + 5) return;
+	fovscale = tan(DEG2RAD(cgamefov[1] / 2));
+	y = SCREEN_HEIGHT / 2 + tan(DEG2RAD(viewangle + angle)) / fovscale*SCREEN_HEIGHT / 2;
+
+	trap->R_SetColor(color);
+	trap->R_DrawStretchPic(x - width / 2, y - height / 2, width, height, 0, 0, 0, 0, cgs.media.whiteShader);
+	trap->R_SetColor(NULL);
+}
+
+/*
+==============
+DF_DrawPitchHud
+==============
+*/
+void DF_DrawPitchHud ( float pitch ) {
+	char *t;
+	vec4_t	color[3];
+	float angle;
+
+	if ((!(cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) && !cg.snap) || !cg_draw2D.integer) {
+		return;
+	}
+
+	t = cg_pitchHudRgba.string;
+	color[2][0] = atof(COM_Parse(&t));
+	color[2][1] = atof(COM_Parse(&t));
+	color[2][2] = atof(COM_Parse(&t));
+	color[2][3] = atof(COM_Parse(&t));
+
+	angle = cg_pitchHudAngle.value;
+
+	DF_MarkAnglePitch(angle, cg_pitchHudThickness.value, -pitch, cg_pitchHudX.value, cg_pitchHudWidth.value, color[2]);
 }

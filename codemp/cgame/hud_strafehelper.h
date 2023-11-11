@@ -258,7 +258,7 @@ void DF_DrawMovementKeys(centity_t* cent);
 
 usercmd_t DF_DirToCmd(int moveDir);
 
-
+void DF_DrawPitchHud (float pitch);
 
 //dfmania
 // TODO: remove this

@@ -420,5 +420,12 @@ XCVAR_DEF( cg_killfeedIconSize,                 "12",               NULL,       
 XCVAR_DEF( cg_killfeedTextSize,                 "0.8",               NULL,                      CVAR_ARCHIVE )
 XCVAR_DEF( cg_killfeedColors,                   "0",                NULL,                       CVAR_ARCHIVE )
 
+//PitchHUD
+XCVAR_DEF(cg_pitchHud, 							"0", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_pitchHudAngle, 					"", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_pitchHudThickness, 				"2", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_pitchHudX, 						"320", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_pitchHudWidth, 					"10", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_pitchHudRgba, 						".8 .8 .8 .8", 		NULL, 						CVAR_ARCHIVE )
 
 #undef XCVAR_DEF
