@@ -49,6 +49,7 @@ float DF_GetAccelerate() {
     switch (state.moveStyle) {
         case MV_PJK:
         case MV_CPM:
+		case MV_OCPM:
         case MV_RJCPM:
         case MV_BOTCPM:
             accelerate = pm_cpm_accelerate;
@@ -73,6 +74,7 @@ float DF_GetAirAccelerate() {
     switch (state.moveStyle) {
         case MV_PJK:
         case MV_CPM:
+		case MV_OCPM:
         case MV_WSW:
         case MV_SLICK:
         case MV_RJCPM:
@@ -99,6 +101,7 @@ float DF_GetAirStrafeAccelerate() {
     switch (state.moveStyle) {
         case MV_PJK:
         case MV_CPM:
+		case MV_OCPM:
         case MV_WSW:
         case MV_RJCPM:
         case MV_BOTCPM:
@@ -121,6 +124,7 @@ float DF_GetAirStopAccelerate() {
     switch (state.moveStyle) {
         case MV_PJK:
         case MV_CPM:
+		case MV_OCPM:
         case MV_WSW:
         case MV_SLICK:
         case MV_RJCPM:
@@ -138,7 +142,8 @@ float DF_GetAirStrafeWishspeed() {
     switch (state.moveStyle) {
         case MV_PJK:
         case MV_CPM:
-        case MV_WSW:
+		case MV_OCPM:
+		case MV_WSW:
         case MV_SLICK:
         case MV_RJCPM:
         case MV_BOTCPM:
@@ -154,7 +159,8 @@ float DF_GetFriction() {
     float friction;
     switch (state.moveStyle) {
         case MV_CPM:
-        case MV_WSW:
+		case MV_OCPM:
+		case MV_WSW:
         case MV_RJCPM:
         case MV_BOTCPM:
             friction = pm_cpm_friction;
@@ -194,7 +200,8 @@ qboolean DF_HasAirControl() {
     switch (state.moveStyle) {
         case MV_PJK:
         case MV_CPM:
-        case MV_WSW:
+		case MV_OCPM:
+		case MV_WSW:
         case MV_SLICK:
         case MV_RJCPM:
         case MV_BOTCPM:
@@ -228,7 +235,8 @@ qboolean DF_HasAutoJump() {
         case MV_JKA:
         case MV_SPEED:
         case MV_SP:
-            hasAutoJump = qfalse;
+		case MV_OCPM:
+			hasAutoJump = qfalse;
             break;
         default:
             hasAutoJump = qtrue;
@@ -238,10 +246,11 @@ qboolean DF_HasAutoJump() {
 
 qboolean showSnapHud() {
 	if ((cgs.serverMod == SVMOD_JAPRO &&
-		 (!cg.predictedPlayerState.stats[STAT_RACEMODE])) ||
+		 ((state.moveStyle == MV_OCPM) ||
+		  (!state.racemode))) ||
 		(cgs.serverMod != SVMOD_JAPRO && pmove_float.integer == 0)) {
 		return qtrue;
-	}else {
+	} else {
 		return qfalse;
 	}
 }
@@ -250,99 +259,112 @@ qboolean showSnapHud() {
 void DF_DrawStrafeHUD(centity_t	*cent)
 {
     //set the playerstate
-    DF_SetPlayerState(cent); //state.
+    if (DF_SetPlayerState(cent) == 1) {
 
-	if (cg_snapHud.integer) {
-		if(showSnapHud() == qtrue) {
-			DF_DrawSnapHud();
-		}
-	}
-
-	if (cg_pitchHud.integer) {
-		DF_DrawPitchHud(state.viewAngles[PITCH]);
-	}
-
-    if (cg_strafeHelper.integer) {
-        DF_StrafeHelper();
-    }
-
-    //japro movement keys
-    if (cg_movementKeys.integer) {
-        DF_DrawMovementKeys(cent);
-    }
-
-    if ((cg_speedometer.integer & SPEEDOMETER_ENABLE) || (cg_strafeHelper.integer & SHELPER_ACCELMETER)) {
-        speedometerXPos = cg_speedometerX.value;
-        jumpsXPos = cg_speedometerJumpsX.value;
-		//Offset the speedometer
-		if (cgs.newHud) {
-			switch (cg_hudFiles.integer)
-			{
-				case 0: speedometerXPos -= 8; break;
-				case 1: speedometerXPos -= 56; break;
-				case 2: speedometerXPos -= 42; break;
-				default: break;
+		if (cg_snapHud.integer) {
+			if (showSnapHud() == qtrue) {
+				DF_DrawSnapHud();
 			}
 		}
-        DF_DrawSpeedometer();
 
-        if (((cg_speedometer.integer & SPEEDOMETER_ACCELMETER) || (cg_strafeHelper.integer & SHELPER_ACCELMETER)))
-            DF_DrawAccelMeter();
-        if (cg_speedometer.integer & SPEEDOMETER_JUMPHEIGHT)
-            DF_DrawJumpHeight(cent);
-        if (cg_speedometer.integer & SPEEDOMETER_JUMPDISTANCE)
-            DF_DrawJumpDistance();
-        if (cg_speedometer.integer & SPEEDOMETER_VERTICALSPEED)
-            DF_DrawVerticalSpeed();
-        if (cg_speedometer.integer & SPEEDOMETER_YAWSPEED)
-            DF_DrawYawSpeed();
-        if ((cg_speedometer.integer & SPEEDOMETER_SPEEDGRAPH)) {
-            rectDef_c speedgraphRect;
-            vec4_t foreColor = { 0.0f,0.8f,1.0f,0.8f };
-            vec4_t backColor = { 0.0f,0.8f,1.0f,0.0f };
-            speedgraphRect.x = (SCREEN_WIDTH * 0.5f - (150.0f / 2.0f));
-            speedgraphRect.y = SCREEN_HEIGHT - 22 - 2;
-            speedgraphRect.w = 150.0f;
-            speedgraphRect.h = 22.0f;
-            DF_GraphAddSpeed();
-            DF_DrawSpeedGraph(&speedgraphRect, foreColor, backColor);
-        }
-        if ((cg_speedometer.integer & SPEEDOMETER_SPEEDGRAPHOLD))
-            DF_DrawSpeedGraphOld();
-    }
+		if (cg_pitchHud.integer) {
+			DF_DrawPitchHud(state.viewAngles[PITCH]);
+		}
 
-    if (cg_raceTimer.integer || cg_raceStart.integer)
-        DF_RaceTimer();
+		if (cg_strafeHelper.integer) {
+			DF_StrafeHelper();
+		}
 
-    //jaPRO strafehelper line crosshair
+		//japro movement keys
+		if (cg_movementKeys.integer) {
+			DF_DrawMovementKeys(cent);
+		}
 
-    if (cg_strafeHelper.integer & SHELPER_CROSSHAIR) {
-        vec4_t		hcolor;
-        float		lineWidth;
+		if ((cg_speedometer.integer & SPEEDOMETER_ENABLE) || (cg_strafeHelper.integer & SHELPER_ACCELMETER)) {
+			speedometerXPos = cg_speedometerX.value;
+			jumpsXPos = cg_speedometerJumpsX.value;
+			//Offset the speedometer
+			if (cgs.newHud) {
+				switch (cg_hudFiles.integer) {
+					case 0:
+						speedometerXPos -= 8;
+						break;
+					case 1:
+						speedometerXPos -= 56;
+						break;
+					case 2:
+						speedometerXPos -= 42;
+						break;
+					default:
+						break;
+				}
+			}
+			DF_DrawSpeedometer();
 
-        if (!cg.crosshairColor[0] && !cg.crosshairColor[1] && !cg.crosshairColor[2]) { //default to white
-            hcolor[0] = 1.0f;
-            hcolor[1] = 1.0f;
-            hcolor[2] = 1.0f;
-            hcolor[3] = 1.0f;
-        }
-        else {
-            hcolor[0] = cg.crosshairColor[0];
-            hcolor[1] = cg.crosshairColor[1];
-            hcolor[2] = cg.crosshairColor[2];
-            hcolor[3] = cg.crosshairColor[3];
-        }
+			if (((cg_speedometer.integer & SPEEDOMETER_ACCELMETER) || (cg_strafeHelper.integer & SHELPER_ACCELMETER)))
+				DF_DrawAccelMeter();
+			if (cg_speedometer.integer & SPEEDOMETER_JUMPHEIGHT)
+				DF_DrawJumpHeight(cent);
+			if (cg_speedometer.integer & SPEEDOMETER_JUMPDISTANCE)
+				DF_DrawJumpDistance();
+			if (cg_speedometer.integer & SPEEDOMETER_VERTICALSPEED)
+				DF_DrawVerticalSpeed();
+			if (cg_speedometer.integer & SPEEDOMETER_YAWSPEED)
+				DF_DrawYawSpeed();
+			if ((cg_speedometer.integer & SPEEDOMETER_SPEEDGRAPH)) {
+				rectDef_c speedgraphRect;
+				vec4_t foreColor = {0.0f, 0.8f, 1.0f, 0.8f};
+				vec4_t backColor = {0.0f, 0.8f, 1.0f, 0.0f};
+				speedgraphRect.x = (SCREEN_WIDTH * 0.5f - (150.0f / 2.0f));
+				speedgraphRect.y = SCREEN_HEIGHT - 22 - 2;
+				speedgraphRect.w = 150.0f;
+				speedgraphRect.h = 22.0f;
+				DF_GraphAddSpeed();
+				DF_DrawSpeedGraph(&speedgraphRect, foreColor, backColor);
+			}
+			if ((cg_speedometer.integer & SPEEDOMETER_SPEEDGRAPHOLD))
+				DF_DrawSpeedGraphOld();
+		}
 
-        lineWidth = cg_strafeHelperLineWidth.value;
-        if (lineWidth < 0.25f)
-            lineWidth = 0.25f;
-        else if (lineWidth > 5)
-            lineWidth = 5;
+		if (cg_raceTimer.integer || cg_raceStart.integer)
+			DF_RaceTimer();
 
-        DF_DrawLine((0.5f * SCREEN_WIDTH), (0.5f * SCREEN_HEIGHT) - 5.0f,
-					(0.5f * SCREEN_WIDTH), (0.5f * SCREEN_HEIGHT) + 5.0f,
-					lineWidth, hcolor, hcolor[3], 0); //640x480, 320x240
-    }
+		//jaPRO strafehelper line crosshair
+
+		if (cg_strafeHelper.integer & SHELPER_CROSSHAIR) {
+			vec4_t hcolor;
+			float lineWidth;
+
+			if (!cg.crosshairColor[0] && !cg.crosshairColor[1] && !cg.crosshairColor[2]) { //default to white
+				hcolor[0] = 1.0f;
+				hcolor[1] = 1.0f;
+				hcolor[2] = 1.0f;
+				hcolor[3] = 1.0f;
+			} else {
+				hcolor[0] = cg.crosshairColor[0];
+				hcolor[1] = cg.crosshairColor[1];
+				hcolor[2] = cg.crosshairColor[2];
+				hcolor[3] = cg.crosshairColor[3];
+			}
+
+			lineWidth = cg_strafeHelperLineWidth.value;
+			if (lineWidth < 0.25f)
+				lineWidth = 0.25f;
+			else if (lineWidth > 5)
+				lineWidth = 5;
+
+			DF_DrawLine((0.5f * SCREEN_WIDTH), (0.5f * SCREEN_HEIGHT) - 5.0f,
+						(0.5f * SCREEN_WIDTH), (0.5f * SCREEN_HEIGHT) + 5.0f,
+						lineWidth, hcolor, hcolor[3], 0); //640x480, 320x240
+		}
+
+		//set wasOnGround here, we need this as friction only gets applied if on the ground for more than 1 frame
+		if (state.onGround) {
+			state.cgaz.wasOnGround = qtrue;
+		} else {
+			state.cgaz.wasOnGround = qfalse;
+		}
+	}
 }
 
 /* Strafehelper */
@@ -465,59 +487,98 @@ void DF_StrafeHelper() {
        && (rearActiveLine.onScreen && rearActiveLine.active)) {
         DF_DrawStrafeLine(rearActiveLine);
     }
-
-    //set wasOnGround here, we need this as friction only gets applied if on the ground for more than 1 frame
-    if(state.onGround){
-        state.cgaz.wasOnGround = qtrue;
-    } else {
-        state.cgaz.wasOnGround = qfalse;
-    }
 }
 
 /* Strafehelper Setters */
 
 //sets the dfstate function used for strafehelper calculations
-void DF_SetPlayerState(centity_t	*cent)
+int DF_SetPlayerState(centity_t *cent)
 {
 	state.moveStyle = DF_GetMovePhysics();
-    state.velocity = cg.predictedPlayerState.velocity;
-    if (state.moveStyle == MV_SWOOP && cg.predictedPlayerState.m_iVehicleNum) {
-        centity_t *vehCent = &cg_entities[cg.predictedPlayerState.m_iVehicleNum];
-        state.velocity = vehCent->currentState.pos.trDelta; //jerky otherwise?
-    }
-    if (cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) // are we a real client
-    {
-        DF_SetClientReal();
-    }
-    else if (cg.snap) //or are we a spectator/demo
-    {
-        DF_SetClient();
+    if (cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) { // are we a real client
+		DF_SetClientReal();
+    } else if (cg.snap) {  //or are we a spectator/demo
+        DF_SetClient(cent);
     } else {
-        return;
+        return 0;
     }
     DF_SetPhysics();
-    state.onGround = (qboolean)(cg.predictedPlayerState.groundEntityNum == ENTITYNUM_WORLD); //on ground this frame
-    if (!(cg_strafeHelper.integer & SHELPER_ORIGINAL) && !cg.renderingThirdPerson)
-        VectorCopy(cg.refdef.vieworg, state.viewOrg);
-    else
-        VectorCopy(cg.predictedPlayerState.origin, state.viewOrg);
-    VectorCopy(cg.predictedPlayerState.viewangles, state.viewAngles);
     DF_SetCGAZ(cent);
+	return 1;
 }
 
 //sets parts of the dfstate struct for a non-predicted client (spectator/demo playback)
-void DF_SetClient(){
+void DF_SetClient(centity_t *cent){
     state.moveDir = cg.snap->ps.movementDir;
-    state.cmd = DF_DirToCmd(state.moveDir);
+	state.cmd = DF_DirToCmd(state.moveDir);
     if (cg.snap->ps.pm_flags & PMF_JUMP_HELD) {
         state.cmd.upmove = 127;
     }
+	if ((DF_GetGroundDistance() > 1 && state.velocity[2] > 8 && state.velocity[2] > cg.lastZSpeed && !cg.snap->ps.fd.forceGripCripple) || (cg.snap->ps.pm_flags & PMF_JUMP_HELD))
+		state.cmd.upmove = 1;
+	else if ((cg.snap->ps.pm_flags & PMF_DUCKED) || CG_InRollAnim(cent))
+		state.cmd.upmove = -1;
+	if (sqrtf(state.velocity[0] * state.velocity[0] + state.velocity[1] * state.velocity[1]) < 9)
+		state.moveDir = -1;
+	cg.lastZSpeed = state.velocity[2];
+	if ((cent->currentState.eFlags & EF_FIRING) && !(cent->currentState.eFlags & EF_ALT_FIRING)) {
+		state.cmd.buttons |= BUTTON_ATTACK;
+		state.cmd.buttons &= ~BUTTON_ALT_ATTACK;
+	}
+	else if (cent->currentState.eFlags & EF_ALT_FIRING) {
+		state.cmd.buttons |= BUTTON_ALT_ATTACK;
+		state.cmd.buttons &= ~BUTTON_ATTACK;
+	}
+	state.onGround = (qboolean)(cg.snap->ps.groundEntityNum == ENTITYNUM_WORLD); //on ground this frame
+	VectorCopy(cg.snap->ps.viewangles, state.viewAngles);
+	if (!(cg_strafeHelper.integer & SHELPER_ORIGINAL) && !cg.renderingThirdPerson)
+		VectorCopy(cg.refdef.vieworg, state.viewOrg);
+	else
+		VectorCopy(cg.snap->ps.origin, state.viewOrg);
+	state.racemode = (qboolean)cg.snap->ps.stats[STAT_RACEMODE];
+	state.speed = cg.snap->ps.speed;
+	state.m_iVehicleNum = cg.snap->ps.m_iVehicleNum;
+	state.vehCent = &cg_entities[cg.snap->ps.m_iVehicleNum];
+	state.commandTime = cg.snap->ps.commandTime;
+	state.pm_type = cg.snap->ps.pm_type;
+	state.groundEntityNum = cg.snap->ps.groundEntityNum;
+	state.clientnum = cg.snap->ps.clientNum;
+	state.vertspeed = cg.snap->ps.velocity[2];
+	state.pm_time = cg.snap->ps.pm_time;
+	state.duelTime = cg.snap->ps.duelTime;
+	if (state.m_iVehicleNum) {
+		state.velocity = state.vehCent->currentState.pos.trDelta;
+	} else {
+		state.velocity = cent->currentState.pos.trDelta;
+	}
 }
 
 //sets parts of the dfstate struct for a predicted client
 void DF_SetClientReal(){
     state.moveDir = cg.predictedPlayerState.movementDir; //0-7 movement dir
     trap->GetUserCmd(trap->GetCurrentCmdNumber(), &state.cmd);
+	state.onGround = (qboolean)(cg.predictedPlayerState.groundEntityNum == ENTITYNUM_WORLD); //on ground this frame
+	VectorCopy(cg.predictedPlayerState.viewangles, state.viewAngles);
+	if (!(cg_strafeHelper.integer & SHELPER_ORIGINAL) && !cg.renderingThirdPerson)
+		VectorCopy(cg.refdef.vieworg, state.viewOrg);
+	else
+		VectorCopy(cg.predictedPlayerState.origin, state.viewOrg);
+	state.racemode = (qboolean)cg.predictedPlayerState.stats[STAT_RACEMODE];
+	state.speed = cg.predictedPlayerState.speed;
+	state.m_iVehicleNum = cg.predictedPlayerState.m_iVehicleNum;
+	state.vehCent = &cg_entities[cg.predictedPlayerState.m_iVehicleNum];
+	state.commandTime = cg.predictedPlayerState.commandTime;
+	state.pm_type = cg.predictedPlayerState.pm_type;
+	state.groundEntityNum = cg.predictedPlayerState.groundEntityNum;
+	state.clientnum = cg.predictedPlayerState.clientNum;
+	state.vertspeed = cg.predictedPlayerState.velocity[2];
+	state.pm_time = cg.predictedPlayerState.pm_time;
+	state.duelTime = cg.predictedPlayerState.duelTime;
+	if (state.m_iVehicleNum) {
+		state.velocity = state.vehCent->playerState->velocity;
+	} else {
+		state.velocity = cg.predictedPlayerState.velocity;
+	}
 }
 
 //sets the constants relative to the current movement styles physics
@@ -545,7 +606,7 @@ void DF_SetPhysics() {
 //calls functions that sets values to the cgaz struct
 void DF_SetCGAZ(centity_t *cent){
     DF_SetFrameTime();
-    DF_SetCurrentSpeed(cent);
+	state.cgaz.currentSpeed = sqrtf(state.velocity[0] * state.velocity[0] + state.velocity[1] * state.velocity[1]); // is this right?
     DF_SetVelocityAngles();
     state.cgaz.wishspeed = DF_GetWishspeed(state.cmd);
 }
@@ -555,33 +616,17 @@ void DF_SetCGAZ(centity_t *cent){
 //sets the frametime for the cgaz struct
 void DF_SetFrameTime(){
     float frameTime;
-    //get the frametime
-    if (cg_strafeHelper_FPS.value < 1) {
-        frameTime = ((float) cg.frametime * 0.001f);
-    }
-    else if (cg_strafeHelper_FPS.value > 1000) {
-        frameTime = 1;
-    } else {
-        frameTime = 1 / cg_strafeHelper_FPS.value;
-    }
-    //set the frametime
-    state.cgaz.frametime = frameTime;
-}
-
-//sets the current speed for the cgaz struct
-void DF_SetCurrentSpeed(centity_t *cent) {
-	vec_t * velocity;
-	if (cg.predictedPlayerState.m_iVehicleNum) {
-		centity_t *vehCent = &cg_entities[cg.predictedPlayerState.m_iVehicleNum];
-		velocity = (cent->currentState.clientNum == cg.clientNum ?
-				vehCent->playerState->velocity : vehCent->currentState.pos.trDelta);
-		state.cgaz.currentSpeed = sqrtf(velocity[0] * velocity[0] + velocity[1] * velocity[1]); // is this right?
+	if(state.racemode && state.moveStyle == MV_OCPM){
+		cg.frametime = 8;
 	}
-	else {
-		velocity = (cent->currentState.clientNum == cg.clientNum ?
-				cg.predictedPlayerState.velocity : cent->currentState.pos.trDelta);
-		state.cgaz.currentSpeed = sqrtf(velocity[0] * velocity[0] + velocity[1] * velocity[1]); // is this right?
+	if (cg_strafeHelper_FPS.value < 1) {
+		frameTime = ((float) cg.frametime * 0.001f);
+	} else if (cg_strafeHelper_FPS.value > 1000) {
+		frameTime = 1;
+	} else {
+		frameTime = 1 / cg_strafeHelper_FPS.value;
 	}
+	state.cgaz.frametime = frameTime;
 }
 
 //sets the velocity angle for the cgaz struct
@@ -729,7 +774,7 @@ dfsline DF_GetLine(int moveDir, qboolean rear, qboolean max) {
     if(moveDir % 2 == 0){ //if moveDir is even - it's a single key press
         if(state.physics.hasAirControl){ //air control uses the center line if on for single key presses
             if(moveDir < KEY_CENTER){
-                    draw = qtrue;
+                draw = qtrue;
             } else { //it's the center line
                 if (moveDir == KEY_CENTER && state.strafeHelper.center) {
                     draw = qtrue;
@@ -987,12 +1032,13 @@ float CGAZ_Opt(qboolean onGround, float accelerate, float currentSpeed, float wi
     float		fmove, smove;
     vec3_t		forward, right, up;
     float		wishspeed;
-    //float		scale;
+    float		scale;
 
     fmove = inCmd.forwardmove;
     smove = inCmd.rightmove;
 
-    //scale = DF_GetCmdScale( inCmd ); - for OCPM/SP
+	if(state.moveStyle & (MV_OCPM | MV_SP))
+    	scale = DF_GetCmdScale( inCmd ); // for OCPM/ fixed SP
 
     AngleVectors(state.viewAngles, forward, right, up);
     // project moves down to flat plane
@@ -1006,47 +1052,47 @@ float CGAZ_Opt(qboolean onGround, float accelerate, float currentSpeed, float wi
     }
     wishvel[2] = 0; //wishdir
     wishspeed = VectorNormalize(wishvel);
+	if(state.moveStyle == MV_OCPM)
+		wishspeed *= scale; // for OCPM/ fixed SP
 
-    if (cg.predictedPlayerState.pm_type == PM_JETPACK) {
+    if (state.pm_type == PM_JETPACK) {
         if (inCmd.upmove <= 0)
             wishspeed *= 0.8f;
         else
             wishspeed *= 2.0f;
     }
-    if (state.moveStyle == MV_SWOOP && cg.predictedPlayerState.m_iVehicleNum) {
-        centity_t *vehCent = &cg_entities[cg.predictedPlayerState.m_iVehicleNum];
-        if (cg.predictedPlayerState.commandTime < vehCent->m_pVehicle->m_iTurboTime) {
-            wishspeed = vehCent->m_pVehicle->m_pVehicleInfo->turboSpeed;//1400
+    if (state.moveStyle == MV_SWOOP && state.m_iVehicleNum) {
+        if (state.commandTime < state.vehCent->m_pVehicle->m_iTurboTime) {
+            wishspeed = state.vehCent->m_pVehicle->m_pVehicleInfo->turboSpeed;//1400
         }
         else {
-            wishspeed = vehCent->m_pVehicle->m_pVehicleInfo->speedMax;//700
+            wishspeed = state.vehCent->m_pVehicle->m_pVehicleInfo->speedMax;//700
         }
     }
 
     if(state.moveStyle != MV_SP) {
-        wishspeed = cg.predictedPlayerState.speed; //this seems more accurate than using scale?
+        wishspeed = state.speed; //this seems more accurate than using scale?
         //air control has a different wishspeed when using A or D only in the air
         if(!(state.onGround && state.cgaz.wasOnGround) && state.physics.hasAirControl &&
            (wishspeed > state.physics.airstrafewishspeed) && (fmove == 0 && smove != 0)) {
             wishspeed = state.physics.airstrafewishspeed;
         }
     }
-    //SP only applies the scale when on the ground and also encourages deceleration away from current velocity
-    if(state.moveStyle == MV_SP){
-        if (!(cg.predictedPlayerState.pm_flags & PMF_JUMP_HELD) && inCmd.upmove > 0) { //Also, wishspeed *= scale.  Scale is different cuz of upmove in air.  Only works ingame not from spec
-            wishspeed /= 1.41421356237f; //umm.. dunno.. divide by sqrt(2)
-        }
-    }
+	//SP only applies the scale when on the ground and also encourages deceleration away from current velocity
+	if(state.moveStyle == MV_SP){
+		if(DotProduct (state.velocity, wishvel) < 0.0f) {
+			wishspeed *= state.physics.airdecelrate;
+		}
+	}
 
     if(state.moveStyle == MV_QW){
-        if(wishspeed > 30){
-            wishspeed = 30;
+        if(wishspeed > pm_qw_airstrafewishspeed){
+            wishspeed = pm_qw_airstrafewishspeed;
         }
     }
     return wishspeed;
 }
 
-/*
 //takes a user command and returns the emulated command scale as a float
  float DF_GetCmdScale( usercmd_t cmd) {
     int		max;
@@ -1055,7 +1101,7 @@ float CGAZ_Opt(qboolean onGround, float accelerate, float currentSpeed, float wi
     signed char		umove = 0; //cmd->upmove;
     //don't factor upmove into scaling speed
 
-    if(state.moveStyle == MV_SP){ //upmove velocity scaling add ocpm
+    if(state.moveStyle & (MV_OCPM | MV_SP)) { //upmove velocity scaling add ocpm
         umove = state.cmd.upmove;
     }
     max = abs( cmd.forwardmove );
@@ -1074,7 +1120,7 @@ float CGAZ_Opt(qboolean onGround, float accelerate, float currentSpeed, float wi
     scale = (float)state.cgaz.currentSpeed * (float)max / ( 127.0f * total );
 
     return scale;
-} */
+}
 
 /* Strafehelper Style Distributor */
 
@@ -1183,7 +1229,7 @@ float CGAZ_Opt(qboolean onGround, float accelerate, float currentSpeed, float wi
     cmd = DF_DirToCmd(moveDir);
 
 
-    g_speed=cg.predictedPlayerState.speed;
+    g_speed=state.speed;
     accel = g_speed;
     accel*=8.0f;
     accel/=1000;
@@ -1291,7 +1337,7 @@ tremulous - append a speed to the sample history for the speed graph
     float speed;
     vec3_t vel;
 
-    VectorCopy(cg.snap->ps.velocity, vel);
+    VectorCopy(state.velocity, vel);
 
     speed = VectorLength(vel);
 
@@ -1423,7 +1469,7 @@ japro - Draw speedometer jump height
 ===================
 */
  void DF_DrawJumpHeight(centity_t* cent) {
-    const vec_t* const velocity = (cent->currentState.clientNum == cg.clientNum ? cg.predictedPlayerState.velocity : cent->currentState.pos.trDelta);
+    const vec_t* const velocity = state.velocity;
     char jumpHeightStr[32] = { 0 };
 
     if (!pm || !pm->ps)
@@ -1455,24 +1501,16 @@ japro - Draw speedometer jump distance
  void DF_DrawJumpDistance(void) {
     char jumpDistanceStr[64] = { 0 };
 
-    if (!cg.snap)
-        return;
+    if (state.onGround) {
 
-    if (cg.predictedPlayerState.groundEntityNum == ENTITYNUM_WORLD) {
-
-        if (!cg.wasOnGround) {//We were just in the air, but now we arnt
+        if (!state.cgaz.wasOnGround) {//We were just in the air, but now we arnt
             vec3_t distance;
 
-            VectorSubtract(cg.predictedPlayerState.origin, cg.lastGroundPosition, distance);
+            VectorSubtract(state.viewOrg, cg.lastGroundPosition, distance);
             cg.lastJumpDistance = sqrtf(distance[0] * distance[0] + distance[1] * distance[1]);
             cg.lastJumpDistanceTime = cg.time;
         }
-
-        VectorCopy(cg.predictedPlayerState.origin, cg.lastGroundPosition);
-        cg.wasOnGround = qtrue;
-    }
-    else {
-        cg.wasOnGround = qfalse;
+        VectorCopy(state.viewOrg, cg.lastGroundPosition);
     }
 
     if ((cg.lastJumpDistanceTime > cg.time - 1500) && (cg.lastJumpDistance > 0.0f)) {
@@ -1490,7 +1528,7 @@ japro - Draw speedometer vertical speed
 */
  void DF_DrawVerticalSpeed(void) {
     char speedStr5[64] = { 0 };
-    float vertspeed = cg.predictedPlayerState.velocity[2];
+    float vertspeed = state.vertspeed;
 
     if (vertspeed < 0)
         vertspeed = -vertspeed;
@@ -1511,8 +1549,8 @@ japro - Draw speedometer vertical speed
 //    unsigned short frameTime;
 //    const int        xOffset = 0;
 
-    const float diff = AngleSubtract(cg.predictedPlayerState.viewangles[YAW], cg.lastYawSpeed);
-    float yawspeed = diff / ((float)cg.frametime * 0.001f);
+    const float diff = AngleSubtract(state.viewAngles[YAW], cg.lastYawSpeed);
+    float yawspeed = diff / ((float)state.cgaz.frametime * 0.001f);
     if (yawspeed < 0)
         yawspeed = -yawspeed;
 
@@ -1546,7 +1584,7 @@ japro - Draw speedometer vertical speed
         CG_Text_Paint(speedometerXPos * cgs.widthRatioCoef, (float)cg_speedometerY.integer, cg_speedometerSize.value, colorTable[CT_WHITE], yawStr, 0.0f, 0, ITEM_ALIGN_RIGHT | ITEM_TEXTSTYLE_OUTLINED, FONT_NONE);
     }
 
-    cg.lastYawSpeed = cg.predictedPlayerState.viewangles[YAW];
+    cg.lastYawSpeed = state.viewAngles[YAW];
 
     speedometerXPos += 16;
 }
@@ -1558,7 +1596,7 @@ japro - Draw acceleration meter
 ===================
 */
  void DF_DrawAccelMeter(void) {
-    const float optimalAccel = cg.predictedPlayerState.speed * ((float)cg.frametime / 1000.0f);
+    const float optimalAccel = state.speed * ((float)state.cgaz.frametime / 1000.0f);
     const float potentialSpeed = sqrtf(cg.previousSpeed * cg.previousSpeed - optimalAccel * optimalAccel + 2 * (state.cgaz.wishspeed * optimalAccel));
     float actualAccel, total, percentAccel, x;
     const float accel = state.cgaz.currentSpeed - cg.previousSpeed;
@@ -1699,7 +1737,7 @@ japro - Draw the speedometer
         vec4_t colorGroundSpeed = { 1, 1, 1, 1 };
         vec4_t colorGroundSpeeds = { 1, 1, 1, 1 };
 
-        if (cg.predictedPlayerState.groundEntityNum != ENTITYNUM_NONE || cg.predictedPlayerState.velocity[2] < 0) { //On ground or Moving down
+        if (state.groundEntityNum != ENTITYNUM_NONE || state.velocity[2] < 0) { //On ground or Moving down
             cg.firstTimeInAir = qfalse;
         }
         else if (!cg.firstTimeInAir) { //Moving up for first time
@@ -1718,8 +1756,8 @@ japro - Draw the speedometer
         }
 
         if (cg_speedometer.integer & SPEEDOMETER_JUMPS) {
-            if ((cg.predictedPlayerState.groundEntityNum != ENTITYNUM_NONE &&
-                 cg.predictedPlayerState.pm_time <= 0 && state.cgaz.currentSpeed < state.cgaz.wishspeed) || state.cgaz.currentSpeed == 0) {
+            if ((state.groundEntityNum != ENTITYNUM_NONE &&
+                 state.pm_time <= 0 && state.cgaz.currentSpeed < state.cgaz.wishspeed) || state.cgaz.currentSpeed == 0) {
                 clearOnNextJump = qtrue;
             }
             if (cg_speedometerJumps.value &&
@@ -1795,10 +1833,10 @@ japro - Ground Distance function for use in jump detection for movement keys
     trace_t tr;
     vec3_t down;
 
-    VectorCopy(cg.predictedPlayerState.origin, down);
+    VectorCopy(state.viewOrg, down);
     down[2] -= 4096;
-    CG_Trace(&tr, cg.predictedPlayerState.origin, NULL, NULL, down, cg.predictedPlayerState.clientNum, MASK_SOLID);
-    VectorSubtract(cg.predictedPlayerState.origin, tr.endpos, down);
+    CG_Trace(&tr, state.viewOrg, NULL, NULL, down, state.clientnum, MASK_SOLID);
+    VectorSubtract(state.viewOrg, tr.endpos, down);
 
     return VectorLength(down) - 24.0f;
 }
@@ -1810,44 +1848,7 @@ japro - Draw the movement keys
 */
  void DF_DrawMovementKeys(centity_t* cent) {
     usercmd_t cmd = { 0 };
-    playerState_t* ps = NULL;
-    int moveDir;
     float w, h, x, y;
-
-    if (!cg.snap)
-        return;
-
-    ps = &cg.predictedPlayerState;
-    moveDir = ps->movementDir;
-
-    //get the current key presses from the client
-    if (cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) { //real client
-        trap->GetUserCmd(trap->GetCurrentCmdNumber(), &cmd);
-    }
-    else //spectating or demo
-    {
-        float xyspeed = sqrtf(ps->velocity[0] * ps->velocity[0] + ps->velocity[1] * ps->velocity[1]);
-        float zspeed = ps->velocity[2];
-        static float lastZSpeed = 0.0f;
-
-        cmd = DF_DirToCmd(moveDir);
-        if ((DF_GetGroundDistance() > 1 && zspeed > 8 && zspeed > lastZSpeed && !cg.snap->ps.fd.forceGripCripple) || (cg.snap->ps.pm_flags & PMF_JUMP_HELD))
-            cmd.upmove = 1;
-        else if ((ps->pm_flags & PMF_DUCKED) || CG_InRollAnim(cent))
-            cmd.upmove = -1;
-        if (xyspeed < 9)
-            moveDir = -1;
-        lastZSpeed = zspeed;
-
-        if ((cent->currentState.eFlags & EF_FIRING) && !(cent->currentState.eFlags & EF_ALT_FIRING)) {
-            cmd.buttons |= BUTTON_ATTACK;
-            cmd.buttons &= ~BUTTON_ALT_ATTACK;
-        }
-        else if (cent->currentState.eFlags & EF_ALT_FIRING) {
-            cmd.buttons |= BUTTON_ALT_ATTACK;
-            cmd.buttons &= ~BUTTON_ATTACK;
-        }
-    }
 
     //set positions based on which setting is used
     if(cg_movementKeys.integer == 1) {
@@ -1876,53 +1877,53 @@ japro - Draw the movement keys
 
     //draw the keys
     if (cg_movementKeys.integer == 3 || cg_movementKeys.integer == 4) { //new movement keys style
-        if (cmd.upmove < 0)
+        if (state.cmd.upmove < 0)
             CG_DrawPic(w * 2 + x, y, w, h, cgs.media.keyCrouchOnShader2);
-        if (cmd.upmove > 0)
+        if (state.cmd.upmove > 0)
             CG_DrawPic(x, y, w, h, cgs.media.keyJumpOnShader2);
-        if (cmd.forwardmove < 0)
+        if (state.cmd.forwardmove < 0)
             CG_DrawPic(w + x, h * 2 + y, w, h, cgs.media.keyBackOnShader2);
-        if (cmd.forwardmove > 0)
+        if (state.cmd.forwardmove > 0)
             CG_DrawPic(w + x, y, w, h, cgs.media.keyForwardOnShader2);
-        if (cmd.rightmove < 0)
+        if (state.cmd.rightmove < 0)
             CG_DrawPic(x, h + y, w, h, cgs.media.keyLeftOnShader2);
-        if (cmd.rightmove > 0)
+        if (state.cmd.rightmove > 0)
             CG_DrawPic(w * 2 + x, h + y, w, h, cgs.media.keyRightOnShader2);
-        if (cmd.buttons & BUTTON_ATTACK)
+        if (state.cmd.buttons & BUTTON_ATTACK)
             CG_DrawPic(x, 2 * h + y, w, h, cgs.media.keyAttackOn2);
-        if (cmd.buttons & BUTTON_ALT_ATTACK)
+        if (state.cmd.buttons & BUTTON_ALT_ATTACK)
             CG_DrawPic(w * 2 + x, 2 * h + y, w, h, cgs.media.keyAltOn2);
     } else if (cg_movementKeys.integer == 1 || cg_movementKeys.integer == 2) { //original movement keys style
         if (cmd.upmove < 0)
             CG_DrawPic(w * 2 + x, y, w, h, cgs.media.keyCrouchOnShader);
         else
             CG_DrawPic(w * 2 + x, y, w, h, cgs.media.keyCrouchOffShader);
-        if (cmd.upmove > 0)
+        if (state.cmd.upmove > 0)
             CG_DrawPic(x, y, w, h, cgs.media.keyJumpOnShader);
         else
             CG_DrawPic(x, y, w, h, cgs.media.keyJumpOffShader);
-        if (cmd.forwardmove < 0)
+        if (state.cmd.forwardmove < 0)
             CG_DrawPic(w + x, h + y, w, h, cgs.media.keyBackOnShader);
         else
             CG_DrawPic(w + x, h + y, w, h, cgs.media.keyBackOffShader);
-        if (cmd.forwardmove > 0)
+        if (state.cmd.forwardmove > 0)
             CG_DrawPic(w + x, y, w, h, cgs.media.keyForwardOnShader);
         else
             CG_DrawPic(w + x, y, w, h, cgs.media.keyForwardOffShader);
-        if (cmd.rightmove < 0)
+        if (state.cmd.rightmove < 0)
             CG_DrawPic(x, h + y, w, h, cgs.media.keyLeftOnShader);
         else
             CG_DrawPic(x, h + y, w, h, cgs.media.keyLeftOffShader);
-        if (cmd.rightmove > 0)
+        if (state.cmd.rightmove > 0)
             CG_DrawPic(w * 2 + x, h + y, w, h, cgs.media.keyRightOnShader);
         else
             CG_DrawPic(w * 2 + x, h + y, w, h, cgs.media.keyRightOffShader);
         if(cg_movementKeys.integer == 2) {
-            if (cmd.buttons & BUTTON_ATTACK)
+            if (state.cmd.buttons & BUTTON_ATTACK)
                 CG_DrawPic(w * 3 + x, y, w, h, cgs.media.keyAttackOn);
             else
                 CG_DrawPic(w * 3 + x, y, w, h, cgs.media.keyAttackOff);
-            if (cmd.buttons & BUTTON_ALT_ATTACK)
+            if (state.cmd.buttons & BUTTON_ALT_ATTACK)
                 CG_DrawPic(w * 3 + x, h + y, w, h, cgs.media.keyAltOn);
             else
                 CG_DrawPic(w * 3 + x, h + y, w, h, cgs.media.keyAltOff);
@@ -1932,7 +1933,7 @@ japro - Draw the movement keys
 
  void DF_RaceTimer(void)
 {
-    if (!cg.predictedPlayerState.stats[STAT_RACEMODE] || !cg.predictedPlayerState.duelTime) {
+    if (!state.racemode || !state.duelTime) {
         cg.startSpeed = 0;
         cg.displacement = 0;
         cg.maxSpeed = 0;
@@ -1945,7 +1946,7 @@ japro - Draw the movement keys
         char startStr[48] = { 0 };
         vec4_t colorStartSpeed = {1, 1, 1, 1};
 
-        const int time = (cg.time - cg.predictedPlayerState.duelTime);
+        const int time = (cg.time - state.duelTime);
         const int minutes = (time / 1000) / 60;
         const int seconds = (time / 1000) % 60;
         const int milliseconds = (time % 1000);
@@ -2006,12 +2007,11 @@ void DF_DrawShowPos(void)
     static char showPosString[128];
     static char showPitchString[8];
     vec4_t colorPitch = {0, 0, 0, 1};
-    playerState_t *ps = &cg.predictedPlayerState;
     float vel;
     float pitchAngle;
     float pitchColor;
     float pitchRange;
-    pitchAngle = fabsf(ps->viewangles[PITCH] + cg_pitchHelperOffset.value);
+    pitchAngle = fabsf(state.viewAngles[PITCH] + cg_pitchHelperOffset.value);
     if(pitchAngle > 90){
         pitchAngle = 90;
     }
@@ -2027,23 +2027,17 @@ void DF_DrawShowPos(void)
     }
 
     if(cg_pitchHelper.value){
-        Com_sprintf(showPitchString, sizeof(showPitchString), "%.1f", (float)ps->viewangles[PITCH]);
+        Com_sprintf(showPitchString, sizeof(showPitchString), "%.1f", (float)state.viewAngles[PITCH]);
         CG_Text_Paint((float)cg_pitchHelperX.integer, (float)cg_pitchHelperY.integer, 1.0f, colorPitch, showPitchString, 0, 0, ITEM_TEXTSTYLE_OUTLINESHADOWED, FONT_SMALL2);
     }
 
     if (!cg_showpos.integer)
         return;
 
-    if (!cg.snap)
-        return;
-
-    if (!ps)
-        return;
-
-    vel = sqrtf(state.cgaz.currentSpeed * state.cgaz.currentSpeed + ps->velocity[2] * ps->velocity[2]);
+    vel = sqrtf(state.cgaz.currentSpeed * state.cgaz.currentSpeed + state.velocity[2] * state.velocity[2]);
 
     Com_sprintf(showPosString, sizeof(showPosString), "pos:   %.2f   %.2f   %.2f\nang:   %.2f   %.2f\nvel:     %.2f",
-                (float)ps->origin[0], (float)ps->origin[1], (float)ps->origin[2], (float)ps->viewangles[PITCH], (float)ps->viewangles[YAW], vel);
+                (float)state.viewOrg[0], (float)state.viewOrg[1], (float)state.viewOrg[2], (float)state.viewAngles[PITCH], (float)state.viewAngles[YAW], vel);
 
     CG_Text_Paint(SCREEN_WIDTH - (SCREEN_WIDTH - 340) * cgs.widthRatioCoef, 0, 0.6f, colorWhite,
                   showPosString, 0, 0, ITEM_TEXTSTYLE_OUTLINESHADOWED, FONT_SMALL2);
@@ -2107,16 +2101,16 @@ void DF_DrawSnapHud(void)
 	int colorid = 0;
 	qboolean pro = qfalse;
 
-	if ((!(cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) && !cg.snap) || !cg_draw2D.integer) {
-		return;
-	}
-
 	va[YAW] = state.viewAngles[YAW];
 	state.snappinghud.m[0] = state.cmd.forwardmove;
 	state.snappinghud.m[1] = state.cmd.rightmove;
 
 	speed = cg_snapHudSpeed.integer ? (float)cg_snapHudSpeed.integer : state.cgaz.wishspeed;
-	fps = cg_snapHudFps.integer ? cg_snapHudFps.integer : com_maxFPS.integer;
+	if(state.moveStyle == MV_OCPM){
+		fps = 125;
+	} else {
+		fps = cg_snapHudFps.integer ? cg_snapHudFps.integer : com_maxFPS.integer;
+	}
 
 	if(DF_HasAirControl() == qtrue) {
 		pro = qtrue;
@@ -2198,10 +2192,6 @@ void DF_DrawPitchHud ( float pitch ) {
 	char *t;
 	vec4_t	color[3];
 	float angle;
-
-	if ((!(cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) && !cg.snap) || !cg_draw2D.integer) {
-		return;
-	}
 
 	t = cg_pitchHudRgba.string;
 	color[2][0] = atof(COM_Parse(&t));

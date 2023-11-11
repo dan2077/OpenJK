@@ -495,10 +495,8 @@ XDOCS_CVAR_DEF("cg_killfeedAlignment", "Align the killfeed",
 
 XDOCS_CVAR_DEF("cg_killfeedX", "Offset the killfeed's horizontal position from its current position",""
 )
-
 XDOCS_CVAR_DEF("cg_killfeedY", "Offset the killfeed's vertical position from its current position",""
 )
-
 XDOCS_CVAR_DEF("cg_killfeedIconSize", "Resize the killfeed",""
 )
 XDOCS_CVAR_DEF("cg_killfeedTextSize", "Resize the killfeed",""
@@ -539,6 +537,7 @@ XDOCS_CVAR_DEF("cg_pitchHudWidth", "Horizontal width",""
 )
 XDOCS_CVAR_DEF("cg_pitchHudRgba", "Color of the pitch HUD",""
 )
+
 //Work from above this line
 
 // ...

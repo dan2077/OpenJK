@@ -204,6 +204,17 @@ typedef struct {
     dfshelp         strafeHelper;
     dfcgaz          cgaz;
 	dfsnaphud		snappinghud;
+	qboolean		racemode;
+	float 			speed;
+	int 			m_iVehicleNum;
+	centity_t*		vehCent;
+	int 			commandTime;
+	int 			pm_type;
+	int 			pm_time;
+	int 			groundEntityNum;
+	float 			vertspeed;
+	int 			clientnum;
+	int 			duelTime;
 } dfstate;
 
 typedef struct {
@@ -217,19 +228,15 @@ void DF_DrawShowPos(void);
 
 /* Playerstate Init */
 
-int PM_GetMovePhysics();
-
-
 void DF_StrafeHelper();
-void DF_SetPlayerState(centity_t	*cent);
+int DF_SetPlayerState(centity_t	*cent);
 void DF_SetClientReal();
-void DF_SetClient();
+void DF_SetClient(centity_t	*cent);
 void DF_SetPhysics();
 
 /* Cgaz Init */
 void DF_SetCGAZ(centity_t	*cent);
 void DF_SetFrameTime();
-void DF_SetCurrentSpeed(centity_t	*cent);
 void DF_SetVelocityAngles();
 
 void DF_SetStrafeHelper();

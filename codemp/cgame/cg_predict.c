@@ -1119,19 +1119,23 @@ void CG_PredictPlayerState( void ) {
 		cg.physicsTime = cg.snap->serverTime;
 	}
 
-	//JAPRO - Clientside - Unlock Pmove bounds - Start 
-	if ( pmove_msec.integer < 1 ) {
-		trap->Cvar_Set("pmove_msec", "1");
-	}
-	else if (pmove_msec.integer > 66) {
-		trap->Cvar_Set("pmove_msec", "66");
-	}
-	//JAPRO - Clientside - Unlock Pmove bounds - End 
+	//JAPRO - Clientside - Unlock Pmove bounds - Start
+	if (cgs.serverMod == SVMOD_JAPRO && cg.predictedPlayerState.stats[STAT_RACEMODE] && cg.predictedPlayerState.stats[STAT_MOVEMENTSTYLE] == MV_OCPM){
+		cg_pmove.pmove_fixed = 0;
+		cg_pmove.pmove_float = 0;
+		cg_pmove.pmove_msec = 8;
+	}else {
+		if (pmove_msec.integer < 1) {
+			trap->Cvar_Set("pmove_msec", "1");
+		} else if (pmove_msec.integer > 66) {
+			trap->Cvar_Set("pmove_msec", "66");
+		}
+		//JAPRO - Clientside - Unlock Pmove bounds - End
 
-	cg_pmove.pmove_fixed = pmove_fixed.integer;// | cg_pmove_fixed.integer;
-	cg_pmove.pmove_float = pmove_float.integer;
-	cg_pmove.pmove_msec = pmove_msec.integer;
-
+		cg_pmove.pmove_fixed = pmove_fixed.integer;
+		cg_pmove.pmove_float = pmove_float.integer;
+		cg_pmove.pmove_msec = pmove_msec.integer;
+	}
 	for ( i = 0 ; i < MAX_GENTITIES ; i++ )
 	{
 		//Written this way for optimal speed, even though it doesn't look pretty.
@@ -1301,11 +1305,11 @@ void CG_PredictPlayerState( void ) {
 			}
 		}
 
-		/*if (cg.predictedPlayerState.stats[STAT_RACEMODE] && cg_predictRacemode.integer) { //loda fixme
+		if (cg.predictedPlayerState.stats[STAT_RACEMODE] && (cg.predictedPlayerState.stats[STAT_MOVEMENTSTYLE] == MV_OCPM)) {
 			cg_pmove.cmd.serverTime = ((cg_pmove.cmd.serverTime + 7) / 8) * 8;
 		}
-		else*/ if ( cg_pmove.pmove_fixed ) { //loda fixme
-			cg_pmove.cmd.serverTime = ((cg_pmove.cmd.serverTime + pmove_msec.integer-1) / pmove_msec.integer) * pmove_msec.integer;
+		else if (cg_pmove.pmove_fixed) {
+			cg_pmove.cmd.serverTime = ((cg_pmove.cmd.serverTime + (pmove_msec.integer-1)) / pmove_msec.integer) * pmove_msec.integer;
 		}
 
 		cg_pmove.animations = bgAllAnims[pEnt->localAnimIndex].anims;
