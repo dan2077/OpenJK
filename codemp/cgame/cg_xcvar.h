@@ -420,6 +420,17 @@ XCVAR_DEF( cg_killfeedIconSize,                 "12",               NULL,       
 XCVAR_DEF( cg_killfeedTextSize,                 "0.8",               NULL,                      CVAR_ARCHIVE )
 XCVAR_DEF( cg_killfeedColors,                   "0",                NULL,                       CVAR_ARCHIVE )
 
+//Snaphud
+XCVAR_DEF(cg_snapHud, 							"0", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudRgba1, 						".02 .1 .02 .4", 	NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudRgba2, 						".05 .05 .05 .1", 	NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudY, 							"248", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudHeight, 					"8", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudAuto, 						"1", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudDef, 						"45", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudSpeed, 						"0", 				NULL, 						CVAR_ARCHIVE )
+XCVAR_DEF(cg_snapHudFps, 						"0", 				NULL, 						CVAR_ARCHIVE )
+
 //PitchHUD
 XCVAR_DEF(cg_pitchHud, 							"0", 				NULL, 						CVAR_ARCHIVE )
 XCVAR_DEF(cg_pitchHudAngle, 					"", 				NULL, 						CVAR_ARCHIVE )

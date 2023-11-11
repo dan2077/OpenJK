@@ -506,6 +506,26 @@ XDOCS_CVAR_DEF("cg_killfeedTextSize", "Resize the killfeed",""
 XDOCS_CVAR_DEF("cg_killfeedColors", "Color the killfeed icons",""
 )
 
+//SnapHUD
+XDOCS_CVAR_DEF("cg_snapHud", "Enable/Disable the snap HUD",""
+)
+XDOCS_CVAR_DEF("cg_snapHudRgba1", "Color for single key press",""
+)
+XDOCS_CVAR_DEF("cg_snapHudRgba2", "Color for two keys pressed",""
+)
+XDOCS_CVAR_DEF("cg_snapHudY", "Vertical position",""
+)
+XDOCS_CVAR_DEF("cg_snapHudHeight", "Vertical height ",""
+)
+XDOCS_CVAR_DEF("cg_snapHudAuto", "Automatically detect best settings",""
+)
+XDOCS_CVAR_DEF("cg_snapHudDef", "",""
+)
+XDOCS_CVAR_DEF("cg_snapHudSpeed", "Basespeed for calculations (Leave default for auto)",""
+)
+XDOCS_CVAR_DEF("cg_snapHudFps", "FPS for calculations (Leave default for auto)",""
+)
+
 //PitchHUD
 XDOCS_CVAR_DEF("cg_pitchHud", "Enable/Disable the pitch HUD",""
 )

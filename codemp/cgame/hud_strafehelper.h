@@ -180,6 +180,18 @@ typedef struct {
     float offset;
 }dfshelp;
 
+//snaphud start
+#define SNAPHUD_MAXZONES	128
+
+typedef struct {
+	int			speed;
+	float		zones[SNAPHUD_MAXZONES];
+	int			count;
+	vec2_t		m;
+	qboolean	promode;
+	int 		fps;
+} dfsnaphud;
+
 typedef struct {
     qboolean        onGround;
     vec_t*          velocity;
@@ -191,6 +203,7 @@ typedef struct {
     vec3_t          viewOrg;
     dfshelp         strafeHelper;
     dfcgaz          cgaz;
+	dfsnaphud		snappinghud;
 } dfstate;
 
 typedef struct {
@@ -258,6 +271,7 @@ void DF_DrawMovementKeys(centity_t* cent);
 
 usercmd_t DF_DirToCmd(int moveDir);
 
+void DF_DrawSnapHud(void);
 void DF_DrawPitchHud (float pitch);
 
 //dfmania

@@ -236,11 +236,27 @@ qboolean DF_HasAutoJump() {
     return hasAutoJump;
 }
 
+qboolean showSnapHud() {
+	if ((cgs.serverMod == SVMOD_JAPRO &&
+		 (!cg.predictedPlayerState.stats[STAT_RACEMODE])) ||
+		(cgs.serverMod != SVMOD_JAPRO && pmove_float.integer == 0)) {
+		return qtrue;
+	}else {
+		return qfalse;
+	}
+}
+
 /* Draw HUD */
 void DF_DrawStrafeHUD(centity_t	*cent)
 {
     //set the playerstate
     DF_SetPlayerState(cent); //state.
+
+	if (cg_snapHud.integer) {
+		if(showSnapHud() == qtrue) {
+			DF_DrawSnapHud();
+		}
+	}
 
 	if (cg_pitchHud.integer) {
 		DF_DrawPitchHud(state.viewAngles[PITCH]);
@@ -2031,6 +2047,127 @@ void DF_DrawShowPos(void)
 
     CG_Text_Paint(SCREEN_WIDTH - (SCREEN_WIDTH - 340) * cgs.widthRatioCoef, 0, 0.6f, colorWhite,
                   showPosString, 0, 0, ITEM_TEXTSTYLE_OUTLINESHADOWED, FONT_SMALL2);
+}
+
+//SnapHUD
+/*
+================
+DF_FillAngleYaw
+=================
+*/
+void DF_FillAngleYaw(float start, float end, float viewangle, float y, float height, const float *color) {
+	float x, width, fovscale;
+	vec2_t cgamefov = { cg.refdef.fov_x, cg.refdef.fov_y };
+
+	fovscale = tan(DEG2RAD(cgamefov[0] / 2));
+	x = SCREEN_WIDTH / 2 + tan(DEG2RAD(viewangle + start)) / fovscale*SCREEN_WIDTH / 2;
+	width = abs(SCREEN_WIDTH*(tan(DEG2RAD(viewangle + end)) - tan(DEG2RAD(viewangle + start))) / (fovscale * 2)) + 1;
+
+	trap->R_SetColor(color);
+	trap->R_DrawStretchPic(x, y, width, height, 0, 0, 0, 0, cgs.media.whiteShader);
+	trap->R_SetColor(NULL);
+}
+
+static int QDECL sortzones(const void *a, const void *b) {
+	return *(float *)a - *(float *)b;
+}
+
+void DF_UpdateSnapHudSettings(float speed, int fps, qboolean pro) {
+	float step;
+	state.snappinghud.promode = pro;
+	state.snappinghud.fps = fps;
+	state.snappinghud.speed = speed;
+	speed /= state.snappinghud.fps;
+	state.snappinghud.count = 0;
+
+	for (step = floor(speed + 0.5) - 0.5; step>0 && state.snappinghud.count<SNAPHUD_MAXZONES - 2; step--) {
+		state.snappinghud.zones[state.snappinghud.count] = RAD2DEG(acos(step / speed));
+		state.snappinghud.count++;
+		state.snappinghud.zones[state.snappinghud.count] = RAD2DEG(asin(step / speed));
+		state.snappinghud.count++;
+	}
+
+	qsort(state.snappinghud.zones, state.snappinghud.count, sizeof(state.snappinghud.zones[0]), sortzones);
+	state.snappinghud.zones[state.snappinghud.count] = state.snappinghud.zones[0] + 90;
+}
+
+/*
+==============
+DF_DrawSnapHud
+==============
+*/
+void DF_DrawSnapHud(void)
+{
+	int i, y, h;
+	const char *t;
+	vec2_t va;
+	vec4_t	color[3];
+	float speed;
+	int fps;
+	int colorid = 0;
+	qboolean pro = qfalse;
+
+	if ((!(cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) && !cg.snap) || !cg_draw2D.integer) {
+		return;
+	}
+
+	va[YAW] = state.viewAngles[YAW];
+	state.snappinghud.m[0] = state.cmd.forwardmove;
+	state.snappinghud.m[1] = state.cmd.rightmove;
+
+	speed = cg_snapHudSpeed.integer ? (float)cg_snapHudSpeed.integer : state.cgaz.wishspeed;
+	fps = cg_snapHudFps.integer ? cg_snapHudFps.integer : com_maxFPS.integer;
+
+	if(DF_HasAirControl() == qtrue) {
+		pro = qtrue;
+	}
+
+	if (speed != state.snappinghud.speed || fps != state.snappinghud.fps || pro != state.snappinghud.promode) {
+		DF_UpdateSnapHudSettings(speed, fps, pro);
+	}
+
+	y = cg_snapHudY.value;
+	h = cg_snapHudHeight.value;
+
+	switch (cg_snapHudAuto.integer) {
+		case 0:
+			va[YAW] += cg_snapHudDef.value;
+			break;
+		case 1:
+			if (state.snappinghud.promode || (state.snappinghud.m[0] != 0 && state.snappinghud.m[1] != 0)) {
+				va[YAW] += 45;
+			}
+			else if (state.snappinghud.m[0] == 0 && state.snappinghud.m[1] == 0) {
+				va[YAW] += cg_snapHudDef.value;
+			}
+			break;
+		case 2:
+			if (state.snappinghud.m[0] != 0 && state.snappinghud.m[1] != 0) {
+				va[YAW] += 45;
+			}
+			else if (state.snappinghud.m[0] == 0 && state.snappinghud.m[1] == 0) {
+				va[YAW] += cg_snapHudDef.value;
+			}
+			break;
+	}
+
+	t = cg_snapHudRgba2.string;
+	color[1][0] = atof(COM_Parse(&t));
+	color[1][1] = atof(COM_Parse(&t));
+	color[1][2] = atof(COM_Parse(&t));
+	color[1][3] = atof(COM_Parse(&t));
+
+	t = cg_snapHudRgba1.string;
+	color[0][0] = atof(COM_Parse(&t));
+	color[0][1] = atof(COM_Parse(&t));
+	color[0][2] = atof(COM_Parse(&t));
+	color[0][3] = atof(COM_Parse(&t));
+
+	for (i = 0; i<state.snappinghud.count; i++) {
+		DF_FillAngleYaw(state.snappinghud.zones[i], state.snappinghud.zones[i + 1], va[YAW], y, h, color[colorid]);
+		DF_FillAngleYaw(state.snappinghud.zones[i] + 90, state.snappinghud.zones[i + 1] + 90, va[YAW], y, h, color[colorid]);
+		colorid ^= 1;
+	}
 }
 
 //PitchHUD
