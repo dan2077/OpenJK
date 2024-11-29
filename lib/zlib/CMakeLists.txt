@@ -25,7 +25,7 @@
 # files from the root of the tarball to this folder, and then moving the public
 # header files (zlib.h, zconf.h) into the include/ subfolder.
 #
-# The current bundled copy comes from the zlib 1.2.8 release.
+# The current bundled copy comes from the zlib 1.3.0 release.
 
 include_directories(include/)
 

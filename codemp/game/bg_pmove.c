@@ -359,7 +359,7 @@ qboolean BG_CanJetpack(playerState_t *ps)
 	return qtrue;
 }
 
-qboolean QINLINE BG_IsNewJetpacking(playerState_t *ps) {
+static QINLINE qboolean BG_IsNewJetpacking(playerState_t *ps) {
 	if (pm_entSelf->m_pVehicle)
 		return qfalse;
 	if (pm->ps->eFlags & EF_JETPACK_ACTIVE)

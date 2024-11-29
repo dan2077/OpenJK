@@ -1304,7 +1304,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	qglEnd ();
 }
 
-void RE_UploadCinematic (int cols, int rows, const byte *data, int client, qboolean dirty) {
+void RE_UploadCinematic (int cols, int rows, const byte *data, int client, qboolean dirty) { 
 
 	GL_Bind( tr.scratchImage[client] );
 

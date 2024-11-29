@@ -2521,7 +2521,7 @@ void CG_DrawAutoMap(void)
 	trap->R_RenderScene( &refdef );
 }
 
-QINLINE void CG_DoAsync( void ) {
+static QINLINE void CG_DoAsync( void ) {
 	if ( cg.doVstrTime && cg.time > cg.doVstrTime ) {
 		trap->SendConsoleCommand(cg.doVstr);
 		cg.doVstrTime = 0;

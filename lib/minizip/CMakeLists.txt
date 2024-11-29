@@ -34,7 +34,7 @@
 #
 # the public header files are split into the include/minizip subdirectory.
 #
-# The current bundled copy comes from the zlib 1.2.8 release.
+# The current bundled copy comes from the zlib 1.3.1 release.
 
 # These settings only apply to this directory.
 include_directories(${ZLIB_INCLUDE_DIR})

@@ -37,6 +37,7 @@ option(BuildPortableVersion "Build portable version (does not read or write file
 
 option(BuildMPEngine "Whether to create projects for the MP client (eternaljk.x86.exe)" ON)
 option(BuildMPRdVanilla "Whether to create projects for the MP default renderer (rd-eternaljk_x86.dll)" ON)
+option(BuildMPRdVulkan "Whether to create projects for the MP vulkan renderer (rd-vulkan_x86.dll)" ON)
 option(BuildMPDed "Whether to create projects for the MP dedicated server (eternaljkded.exe)" ON)
 option(BuildMPGame "Whether to create projects for the MP server-side gamecode (jampgamex86.dll)" ON)
 option(BuildMPCGame "Whether to create projects for the MP clientside gamecode (cgamex86.dll)" ON)
@@ -61,18 +62,18 @@ set(UseInternalPNGDefault    OFF)
 set(UseInternalJPEGDefault   OFF)
 set(UseInternalSDL2Default   OFF)
 
-if(WIN32)
-  set(UseInternalOpenALDefault ON)
-  set(UseInternalZlibDefault   ON)
-  set(UseInternalPNGDefault    ON)
-  set(UseInternalJPEGDefault   ON)
-  set(UseInternalSDL2Default   ON)
-endif()
-
-if(APPLE)
-  set(UseInternalJPEGDefault   ON)
-  set(UseInternalOpenALDefault ON)
-  set(UseInternalPNGDefault    ON)
+if(UseInternalLibs OR WIN32 OR APPLE)
+  if(WIN32)
+    set(UseInternalOpenALDefault ON)
+    set(UseInternalZlibDefault   ON)
+    set(UseInternalPNGDefault    ON)
+    set(UseInternalJPEGDefault   ON)
+    set(UseInternalSDL2Default   ON)
+  else()
+    set(UseInternalJPEGDefault ON)
+    set(UseInternalPNGDefault  ON)
+    set(UseInternalZlibDefault ON)
+  endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "BSD")
@@ -91,7 +92,7 @@ if(APPLE)
 endif()
 
 # Custom CMake Modules needed
-list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/CMakeModules")
+list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 Include(CheckTypeSize)
 check_type_size("void*" CMAKE_SIZEOF_VOID_P)
@@ -111,7 +112,10 @@ if(WIN32)
 	endif()
 else()
 	set(X86 OFF)
-	if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+	if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
+		set(Architecture "arm64")
+		add_definitions(-DPNG_ARM_NEON_OPT=0)
+	elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
 		set(Architecture "arm")
 	elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
 		set(X86 ON)
@@ -149,6 +153,7 @@ message(STATUS "Git revision is ${GIT_SHA1}")
 # Binary names
 set(MPEngine "eternaljk.${Architecture}")
 set(MPVanillaRenderer "rd-eternaljk_${Architecture}")
+set(MPVulkanRenderer "rd-vulkan_${Architecture}")
 set(MPDed "eternaljkded.${Architecture}")
 set(MPGame "jampgame${Architecture}")
 set(MPCGame "cgame${Architecture}")
@@ -193,9 +198,17 @@ if(MSVC)
 	set(SharedDefines ${SharedDefines} "_SCL_SECURE_NO_WARNINGS")
 	set(SharedDefines ${SharedDefines} "_CRT_NONSTDC_NO_DEPRECATE")
 
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHsc /arch:SSE2")
+	# Warnings
+	# 4244 = conversion' conversion from 'type1' to 'type2', possible loss of data
+	# 4996 = 'function': was declared deprecated
+	# 4267 = 'var' : conversion from 'size_t' to 'type', possible loss of data
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4244 /wd4996 /wd4267")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4996 /wd4267")
 
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
+	if (Architecture STREQUAL "x86")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:SSE2")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
+	endif()
 	
 	# Configure MSVC Runtime
 	include(MSVCRuntime)
@@ -244,6 +257,7 @@ elseif (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_C_COMPILER_ID}" M
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-comment")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsigned-char")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fcommon")
 		if (X86)
 			# "x86 vm will crash without -mstackrealign since MMX
 			# instructions will be used no matter what and they
@@ -338,7 +352,7 @@ set(SharedCommonSafeFiles
 
 
 if(UseInternalJPEG)
-  add_subdirectory(lib/jpeg-9a)
+  add_subdirectory(lib/jpeg-9c)
 else()
   find_package(JPEG REQUIRED)
 endif()

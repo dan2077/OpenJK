@@ -409,11 +409,11 @@ int ClientNumberFromString( gentity_t *to, const char *s, qboolean allowconnecti
 	return -1;
 }
 
-QINLINE qboolean ClientIsIgnored(const int selfID, const int targetID) {
+static QINLINE qboolean ClientIsIgnored(const int selfID, const int targetID) {
 	return (qboolean) (selfID != targetID && ((level.clients[selfID].sess.ignore ^ 0xFFFFFFFF) == 0 || (level.clients[selfID].sess.ignore & (1 << targetID))));
 }
 
-QINLINE qboolean ClientIgnore(const int selfID, const int targetID) {
+static QINLINE qboolean ClientIgnore(const int selfID, const int targetID) {
 	qboolean ignored;
 	const int targetFlag = (1 << targetID);
 	if (level.clients[selfID].sess.ignore & targetFlag) {
@@ -426,7 +426,7 @@ QINLINE qboolean ClientIgnore(const int selfID, const int targetID) {
 	return ignored;
 }
 
-QINLINE qboolean ClientIgnoreAll(const int selfID) {
+static QINLINE qboolean ClientIgnoreAll(const int selfID) {
 	qboolean ignoredAll;
 	if (level.clients[selfID].sess.ignore ^ 0xFFFFFFFF) {
 		level.clients[selfID].sess.ignore = 0xFFFFFFFF;

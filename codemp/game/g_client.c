@@ -2692,7 +2692,7 @@ qboolean ClientUserinfoChanged( int clientNum ) { //I think anything treated as 
 }
 
 //[JAPRO - Serverside - All - Ignore subfunction - Start]
-void QINLINE ClientRemoveIgnore(const int targetID) {
+static void QINLINE ClientRemoveIgnore(const int targetID) {
 	int i;
 	for (i = 0; i < level.maxclients; ++i) {
 		if (level.clients[i].pers.connected == CON_CONNECTED) {

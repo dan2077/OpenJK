@@ -22,6 +22,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "qcommon/q_shared.h"
+#include "rd-vulkan/vulkan/vulkan.h"	// Vulkan
 
 #define MAXPRINTMSG 4096
 
@@ -166,6 +167,9 @@ typedef enum graphicsApi_e
 
 	// Only OpenGL needs special treatment..
 	GRAPHICS_API_OPENGL,
+
+	// Vulkan
+	GRAPHICS_API_VULKAN,
 } graphicsApi_t;
 
 // Graphics API
@@ -210,3 +214,9 @@ void *		WIN_GL_GetProcAddress( const char *proc );
 qboolean	WIN_GL_ExtensionSupported( const char *extension );
 
 uint8_t ConvertUTF32ToExpectedCharset( uint32_t utf32 );
+
+// Vulkan
+void		*WIN_VK_GetInstanceProcAddress(void);
+qboolean	WIN_VK_createSurfaceImpl(VkInstance instance, VkSurfaceKHR *surface);
+void		WIN_VK_destroyWindow(void);
+qboolean	WIN_VK_IsMinimized(void);

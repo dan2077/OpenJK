@@ -50,6 +50,40 @@ typedef enum
 	DLIGHT_PROJECTED
 } eDLightTypes;
 
+typedef enum {
+	MOD_BAD,
+	MOD_BRUSH,
+	MOD_MESH,
+/*
+Ghoul2 Insert Start
+*/
+   	MOD_MDXM,
+	MOD_MDXA
+/*
+Ghoul2 Insert End
+*/
+} modtype_t;
+
+typedef struct model_s {
+	char		name[MAX_QPATH];
+	modtype_t	type;
+	int			index;				// model = tr.models[model->index]
+
+	int			dataSize;			// just for listing purposes
+	struct bmodel_s	*bmodel;			// only if type == MOD_BRUSH
+	md3Header_t	*md3[MD3_MAX_LODS];	// only if type == MOD_MESH
+/*
+Ghoul2 Insert Start
+*/
+	mdxmHeader_t *mdxm;				// only if type == MOD_GL2M which is a GHOUL II Mesh file NOT a GHOUL II animation file
+	mdxaHeader_t *mdxa;				// only if type == MOD_GL2A which is a GHOUL II Animation file
+/*
+Ghoul2 Insert End
+*/
+	int			 numLods;
+	qboolean	bspInstance;
+} model_t;
+
 typedef struct dlight_s {
 	eDLightTypes	mType;
 
@@ -536,10 +570,16 @@ typedef struct trRefdef_s {
 //=================================================================================
 
 // skins allow models to be retextured without modifying the model file
-typedef struct skinSurface_s {
+typedef struct {
 	char		name[MAX_QPATH];
 	shader_t	*shader;
 } skinSurface_t;
+
+typedef struct skin_s {
+	char			name[MAX_QPATH];		// game path, including extension
+	int				numSurfaces;
+	skinSurface_t	*surfaces[128];
+} skin_t;
 
 typedef struct fog_s {
 	int			originalBrushNumber;
@@ -1250,6 +1290,9 @@ extern	cvar_t	*r_noServerGhoul2;
 /*
 Ghoul2 Insert End
 */
+
+extern cvar_t *r_patchStitching;
+
 //====================================================================
 
 void R_SwapBuffers( int );
@@ -1573,8 +1616,6 @@ CURVE TESSELATION
 
 ============================================================
 */
-
-#define PATCH_STITCHING
 
 srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
 								drawVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] );
